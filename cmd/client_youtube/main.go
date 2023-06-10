@@ -7,6 +7,7 @@ import (
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
 	"github.com/allanpk716/rod_helper"
+	"github.com/sirupsen/logrus"
 	"github.com/wader/goutubedl"
 	"io"
 	"os"
@@ -19,6 +20,7 @@ func main() {
 
 	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
 
+	logger.SetLoggerLevel(logrus.DebugLevel)
 	flag.Parse()
 
 	var c settings.Configs
@@ -38,6 +40,7 @@ func main() {
 	goutubedl.Path = c.YTdlpFilePath
 	gOpt := goutubedl.Options{
 		HTTPClient: client.GetClient(),
+		DebugLog:   logger.GetLogger(),
 	}
 	result, err := goutubedl.New(context.Background(), dlUrl, gOpt)
 	if err != nil {
