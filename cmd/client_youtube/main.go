@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
 	"github.com/VideoTranslationTools/client/pkg/settings"
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
@@ -12,6 +13,7 @@ import (
 	"github.com/wader/goutubedl"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -75,6 +77,8 @@ func main() {
 		logger.Fatalln("goutubedl.New", err)
 	}
 
+	nowCacheRootFolder := filepath.Join(c.CacheRootFolder, pkg.ReplaceWindowsSpecString(result.Info.Title, "-"))
+
 	logger.Infoln("Title:", result.Info.Title)
 	logger.Infoln("Subtitles Count:", len(result.Info.Subtitles))
 
@@ -105,8 +109,14 @@ func main() {
 		progressbar.OptionSetDescription("Downloading"),
 	)
 
-	logger.Infoln("Save to cache file ...")
-	f, err := os.Create("output")
+	logger.Infoln("Save to cache folder", nowCacheRootFolder)
+	if pkg.IsDir(nowCacheRootFolder) == false {
+		err = os.MkdirAll(nowCacheRootFolder, os.ModePerm)
+		if err != nil {
+			logger.Fatalln("os.MkdirAll", err)
+		}
+	}
+	f, err := os.Create(filepath.Join(nowCacheRootFolder, "downloaded_video.mp4"))
 	if err != nil {
 		logger.Fatalln("os.Create", err)
 	}
