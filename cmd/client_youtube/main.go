@@ -109,7 +109,7 @@ func main() {
 		progressbar.OptionSetDescription("Downloading"),
 	)
 
-	logger.Infoln("Save to cache folder", nowCacheRootFolder)
+	logger.Infoln("Save to cache folder:", nowCacheRootFolder)
 	if pkg.IsDir(nowCacheRootFolder) == false {
 		err = os.MkdirAll(nowCacheRootFolder, os.ModePerm)
 		if err != nil {
