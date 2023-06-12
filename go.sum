@@ -30,6 +30,8 @@ github.com/allanpk716/rod_helper v0.0.80 h1:IBNSJhOyNAi1ag57zlPtpMPZ7UDc+W+jRKa0
 github.com/allanpk716/rod_helper v0.0.80/go.mod h1:XM+H9QkRJd9ZBhZHIsPWpqB4/7M3RE92YNP+m9E3ZsM=
 github.com/allanpk716/rod_helper v0.0.81 h1:ImLX/x99YcqwLbJ4plxFOCd9FbFPOeHwGfmH2KV0PPA=
 github.com/allanpk716/rod_helper v0.0.81/go.mod h1:90G5OlfwBywEyWudmBf/7xDqiOQlTybY9ahO5jJCvJ8=
+github.com/allanpk716/rod_helper v0.0.82 h1:pSlZjsA9YnvsLnQNz9mzrqL4CgUYzRbT8XPYkdwa1QE=
+github.com/allanpk716/rod_helper v0.0.82/go.mod h1:90G5OlfwBywEyWudmBf/7xDqiOQlTybY9ahO5jJCvJ8=
 github.com/andybalholm/brotli v1.0.1/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
 github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY3JY=
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=

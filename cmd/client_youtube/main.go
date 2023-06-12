@@ -20,7 +20,7 @@ func main() {
 
 	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
 
-	logger.SetLoggerLevel(logrus.DebugLevel)
+	logger.SetLoggerLevel(logrus.InfoLevel)
 	flag.Parse()
 
 	var c settings.Configs

@@ -6,7 +6,7 @@ require (
 	github.com/ChineseSubFinder/csf-supplier-base v0.0.46 // indirect
 	github.com/WQGroup/logger v0.0.6 // indirect
 	github.com/allanpk716/conf v0.1.2 // indirect
-	github.com/allanpk716/rod_helper v0.0.81 // indirect
+	github.com/allanpk716/rod_helper v0.0.82 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.4.0 // indirect
