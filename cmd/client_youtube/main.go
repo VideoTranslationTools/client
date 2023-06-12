@@ -135,12 +135,7 @@ func main() {
 	if err != nil && err != io.EOF {
 		logger.Fatalln("io.Copy", err)
 	}
-
-	err = progress.Finish()
-	if err != nil {
-		logger.Fatalln("progress.Finish", err)
-	}
-
+	
 	err = progress.Finish()
 	if err != nil {
 		logger.Fatalln("progress.Finish", err)
