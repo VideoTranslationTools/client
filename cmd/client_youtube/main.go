@@ -7,6 +7,7 @@ import (
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
 	"github.com/allanpk716/rod_helper"
+	"github.com/schollz/progressbar/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/goutubedl"
 	"io"
@@ -16,8 +17,22 @@ import (
 
 var configFile = flag.String("f", "etc/client_youtube.yaml", "the config file")
 
-func main() {
+type progressWriter struct {
+	writer     io.Writer
+	bar        *progressbar.ProgressBar
+	downloaded int64
+	total      int64
+}
 
+func (pw *progressWriter) Write(p []byte) (int, error) {
+	n := len(p)
+	pw.downloaded += int64(n)
+	pw.bar.Set64(pw.downloaded)
+	_, err := pw.writer.Write(p)
+	return n, err
+}
+
+func main() {
 	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
 
 	logger.SetLoggerLevel(logrus.InfoLevel)
@@ -25,6 +40,7 @@ func main() {
 
 	var c settings.Configs
 	conf.MustLoad(*configFile, &c)
+
 	// 初始化代理设置
 	logger.Infoln("InitFakeUA ...")
 	rod_helper.InitFakeUA(true, "", "")
@@ -35,7 +51,7 @@ func main() {
 	}
 	client, err := rod_helper.NewHttpClient(opt)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalln("rod_helper.NewHttpClient", err)
 	}
 
 	logger.Infoln("Try Download Video From", dlUrl)
@@ -43,32 +59,81 @@ func main() {
 	logger.Infoln("New Downloader ...")
 	goutubedl.Path = c.YTdlpFilePath
 	gOpt := goutubedl.Options{
-		HTTPClient: client.GetClient(),
-		DebugLog:   logger.GetLogger(),
+		Type:              goutubedl.TypeSingle, // 暂时不支持视频列表下载
+		HTTPClient:        client.GetClient(),
+		DebugLog:          logger.GetLogger(),
+		DownloadSubtitles: false,
 	}
+	if c.ProxyType != "no" {
+		// 设置代理
+		gOpt.ProxyUrl = c.ProxyUrl
+	}
+
+	logger.Infoln("Get Download Info ...")
 	result, err := goutubedl.New(context.Background(), dlUrl, gOpt)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalln("goutubedl.New", err)
 	}
+
+	logger.Infoln("Title:", result.Info.Title)
+	logger.Infoln("Subtitles Count:", len(result.Info.Subtitles))
 
 	logger.Infoln("Get Download Info ...")
 	downloadResult, err := result.Download(context.Background(), "best")
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalln("result.Download", err)
 	}
 	defer downloadResult.Close()
+
+	fileSize := int64(result.Info.Filesize)
+	if fileSize <= 0 {
+		logger.Warningln("Get Video Filesize == 0, So maybe the file size is not correct, try FilesizeApprox ...")
+		logger.Infoln("FilesizeApprox:", result.Info.FilesizeApprox)
+		fileSize = int64(result.Info.FilesizeApprox)
+		if fileSize <= 0 {
+			logger.Fatal("Invalid file size")
+		}
+	}
+
+	progress := progressbar.NewOptions(
+		int(fileSize),
+		progressbar.OptionSetWriter(os.Stderr),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionShowCount(),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionSetWidth(30),
+		progressbar.OptionSetDescription("Downloading"),
+	)
 
 	logger.Infoln("Save to cache file ...")
 	f, err := os.Create("output")
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalln("os.Create", err)
 	}
 	defer f.Close()
 
+	pw := &progressWriter{
+		writer:     f,
+		bar:        progress,
+		downloaded: 0,
+		total:      fileSize,
+	}
+
 	logger.Infoln("Downloading ...")
-	_, err = io.Copy(f, downloadResult)
+
+	_, err = io.Copy(pw, downloadResult)
+	if err != nil && err != io.EOF {
+		logger.Fatalln("io.Copy", err)
+	}
+
+	err = progress.Finish()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalln("progress.Finish", err)
+	}
+
+	err = progress.Finish()
+	if err != nil {
+		logger.Fatalln("progress.Finish", err)
 	}
 
 	logger.Infoln("Done")
