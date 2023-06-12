@@ -119,7 +119,7 @@ func main() {
 		total:      fileSize,
 	}
 
-	logger.Infoln("Downloading ...")
+	logger.Infoln("Wait for Downloading ...")
 
 	_, err = io.Copy(pw, downloadResult)
 	if err != nil && err != io.EOF {
