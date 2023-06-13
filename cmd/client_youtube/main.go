@@ -8,6 +8,7 @@ import (
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
 	"github.com/allanpk716/rod_helper"
+	"github.com/go-resty/resty/v2"
 	"github.com/schollz/progressbar/v3"
 	"github.com/sirupsen/logrus"
 	"github.com/wader/goutubedl"
@@ -34,27 +35,8 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 	return n, err
 }
 
-func main() {
-	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
-
-	logger.SetLoggerLevel(logrus.InfoLevel)
-	flag.Parse()
-
-	var c settings.Configs
-	conf.MustLoad(*configFile, &c)
-
-	// 初始化代理设置
-	logger.Infoln("InitFakeUA ...")
-	rod_helper.InitFakeUA(true, "", "")
-	opt := rod_helper.NewHttpClientOptions(5 * time.Second)
-	if c.ProxyType != "no" {
-		// 设置代理
-		opt.SetHttpProxy(c.ProxyUrl)
-	}
-	client, err := rod_helper.NewHttpClient(opt)
-	if err != nil {
-		logger.Fatalln("rod_helper.NewHttpClient", err)
-	}
+// downloadYoutubeVideo 下载 Youtube 视频
+func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string) {
 
 	logger.Infoln("Try Download Video From", dlUrl)
 
@@ -62,6 +44,7 @@ func main() {
 	goutubedl.Path = c.YTdlpFilePath
 	gOpt := goutubedl.Options{
 		Type:              goutubedl.TypeSingle, // 暂时不支持视频列表下载
+		Filter:            "best",               // 下载的视频质量
 		HTTPClient:        client.GetClient(),
 		DebugLog:          logger.GetLogger(),
 		DownloadSubtitles: false,
@@ -83,7 +66,7 @@ func main() {
 	logger.Infoln("Subtitles Count:", len(result.Info.Subtitles))
 
 	logger.Infoln("Get Download Info ...")
-	downloadResult, err := result.Download(context.Background(), "best")
+	downloadResult, err := result.Download(context.Background(), "")
 	if err != nil {
 		logger.Fatalln("result.Download", err)
 	}
@@ -135,11 +118,39 @@ func main() {
 	if err != nil && err != io.EOF {
 		logger.Fatalln("io.Copy", err)
 	}
-	
+
 	err = progress.Finish()
 	if err != nil {
 		logger.Fatalln("progress.Finish", err)
 	}
+
+	logger.Infoln("Download Video Done")
+}
+
+func main() {
+
+	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
+
+	logger.SetLoggerLevel(logrus.InfoLevel)
+	flag.Parse()
+
+	var c settings.Configs
+	conf.MustLoad(*configFile, &c)
+
+	// 初始化代理设置
+	logger.Infoln("InitFakeUA ...")
+	rod_helper.InitFakeUA(true, "", "")
+	opt := rod_helper.NewHttpClientOptions(5 * time.Second)
+	if c.ProxyType != "no" {
+		// 设置代理
+		opt.SetHttpProxy(c.ProxyUrl)
+	}
+	client, err := rod_helper.NewHttpClient(opt)
+	if err != nil {
+		logger.Fatalln("rod_helper.NewHttpClient", err)
+	}
+
+	downloadYoutubeVideo(c, client, dlUrl)
 
 	logger.Infoln("Done")
 }
