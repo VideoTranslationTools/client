@@ -215,7 +215,7 @@ func main() {
 	youtubeVideoFPath := downloadYoutubeVideo(c, client, dlUrl)
 	// 然后调用 FFMPEG 进行音频的导出
 	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
-
+	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
 	println("ffmpegInfo.AudioInfoList[0].Index", ffmpegInfo.AudioInfoList[0].Index)
 
 	logger.Infoln("Done")
