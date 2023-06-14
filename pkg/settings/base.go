@@ -1,6 +1,7 @@
 package settings
 
 type Configs struct {
+	ServerBaseUrl   string // 服务器基础地址
 	ApiKey          string // 通信密钥
 	ProxyType       string `json:",options=[no,http,socks5]"`       // 代理类型
 	ProxyUrl        string `json:",default=http://127.0.0.1:10809"` // 代理地址

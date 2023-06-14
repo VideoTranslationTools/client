@@ -1,3 +1,4 @@
+ServerBaseUrl: ""
 ApiKey: "1111"
 ProxyType: "http"
 ProxyUrl: "http://192.168.50.252:20171"

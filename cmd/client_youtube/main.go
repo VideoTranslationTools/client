@@ -5,6 +5,8 @@ import (
 	"flag"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg/ffmpeg_helper"
+	"github.com/VideoTranslationTools/base/pkg/task_system"
+	"github.com/VideoTranslationTools/client/pkg/machine_translation_helper"
 	"github.com/VideoTranslationTools/client/pkg/settings"
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
@@ -16,10 +18,74 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
 var configFile = flag.String("f", "etc/client_youtube.yaml", "the config file")
+
+func main() {
+
+	dlUrl := flag.String("yt_url", "", "the youtube video url")
+	videoLang := flag.String("yt_lang", "", "the youtube video language")
+
+	logger.SetLoggerLevel(logrus.InfoLevel)
+
+	flag.Parse()
+
+	if *dlUrl == "" {
+		logger.Fatalln("yt_url is empty")
+	}
+
+	if *videoLang == "" {
+		logger.Infoln("yt_lang is empty, will auto detect language")
+	}
+
+	var c settings.Configs
+	conf.MustLoad(*configFile, &c)
+
+	// 初始化代理设置
+	logger.Infoln("InitFakeUA ...")
+	rod_helper.InitFakeUA(true, "", "")
+	opt := rod_helper.NewHttpClientOptions(5 * time.Second)
+	if c.ProxyType != "no" {
+		// 设置代理
+		opt.SetHttpProxy(c.ProxyUrl)
+	}
+	client, err := rod_helper.NewHttpClient(opt)
+	if err != nil {
+		logger.Fatalln("rod_helper.NewHttpClient", err)
+	}
+	// 先下载 youtube 的视频
+	youtubeVideoFPath := downloadYoutubeVideo(c, client, *dlUrl)
+	// 然后调用 FFMPEG 进行音频的导出
+	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
+	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
+	println("ffmpegInfo.AudioInfoList[0].Index", ffmpegInfo.AudioInfoList[0].Index)
+
+	// 获取这个 youtubeVideoFPath 视频文件的文件名称，不包含后缀名
+	videoTitle := strings.TrimSuffix(filepath.Base(youtubeVideoFPath), filepath.Ext(youtubeVideoFPath))
+	// 获取这个 youtubeVideoFPath 视频文件的文件夹目录
+	videoRootFolder := filepath.Dir(youtubeVideoFPath)
+	// 实例化一个 TaskSystemClient
+	tc := task_system.NewTaskSystemClient(c.ServerBaseUrl, c.ApiKey)
+	mth := machine_translation_helper.NewMachineTranslationHelper(tc)
+
+	mth.Process(machine_translation_helper.Opts{
+		InputFPath:                   youtubeVideoFPath,
+		IsAudioOrSRT:                 true,
+		AudioLang:                    *videoLang,
+		TargetTranslationLang:        "CN",
+		DownloadedFileSaveFolderPath: videoRootFolder,
+		TranslatedSRTFileName:        videoTitle + ".srt",
+	})
+
+	logger.Infoln("Done")
+}
+
+const (
+	videoDownloaded = "downloaded"
+)
 
 type progressWriter struct {
 	writer     io.Writer
@@ -182,45 +248,9 @@ func exportAudioFile(c settings.Configs, youtubeVideoFPath string) *ffmpeg_helpe
 
 	// 导出了那些音频文件，列举出来
 	for _, a := range ffmpegInfo.AudioInfoList {
-		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s, GetName(): %s, GetLanguage(): %s\n",
-			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage(), a.GetName(), a.GetLanguage().String())
+		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s\n",
+			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage())
 	}
 
 	return ffmpegInfo
 }
-
-func main() {
-
-	dlUrl := "https://www.youtube.com/watch?v=MpYy6wwqxoo&ab_channel=THEFIRSTTAKE"
-
-	logger.SetLoggerLevel(logrus.InfoLevel)
-	flag.Parse()
-
-	var c settings.Configs
-	conf.MustLoad(*configFile, &c)
-
-	// 初始化代理设置
-	logger.Infoln("InitFakeUA ...")
-	rod_helper.InitFakeUA(true, "", "")
-	opt := rod_helper.NewHttpClientOptions(5 * time.Second)
-	if c.ProxyType != "no" {
-		// 设置代理
-		opt.SetHttpProxy(c.ProxyUrl)
-	}
-	client, err := rod_helper.NewHttpClient(opt)
-	if err != nil {
-		logger.Fatalln("rod_helper.NewHttpClient", err)
-	}
-	// 先下载 youtube 的视频
-	youtubeVideoFPath := downloadYoutubeVideo(c, client, dlUrl)
-	// 然后调用 FFMPEG 进行音频的导出
-	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
-	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
-	println("ffmpegInfo.AudioInfoList[0].Index", ffmpegInfo.AudioInfoList[0].Index)
-
-	logger.Infoln("Done")
-}
-
-const (
-	videoDownloaded = "downloaded"
-)
