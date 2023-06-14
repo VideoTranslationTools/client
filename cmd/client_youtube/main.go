@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
+	"github.com/ChineseSubFinder/csf-supplier-base/pkg/ffmpeg_helper"
 	"github.com/VideoTranslationTools/client/pkg/settings"
 	"github.com/WQGroup/logger"
 	"github.com/allanpk716/conf"
@@ -36,7 +37,7 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 }
 
 // downloadYoutubeVideo 下载 Youtube 视频
-func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string) {
+func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string) string {
 
 	logger.Infoln("Try Download Video From", dlUrl)
 
@@ -60,17 +61,11 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 		logger.Fatalln("goutubedl.New", err)
 	}
 
-	nowCacheRootFolder := filepath.Join(c.CacheRootFolder, pkg.ReplaceWindowsSpecString(result.Info.Title, "-"))
+	videoTitle := pkg.ReplaceWindowsSpecString(result.Info.Title, "-")
+	nowCacheRootFolder := filepath.Join(c.CacheRootFolder, videoTitle)
 
 	logger.Infoln("Title:", result.Info.Title)
 	logger.Infoln("Subtitles Count:", len(result.Info.Subtitles))
-
-	logger.Infoln("Get Download Info ...")
-	downloadResult, err := result.Download(context.Background(), "")
-	if err != nil {
-		logger.Fatalln("result.Download", err)
-	}
-	defer downloadResult.Close()
 
 	fileSize := int64(result.Info.Filesize)
 	if fileSize <= 0 {
@@ -82,6 +77,48 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 		}
 	}
 
+	logger.Infoln("Save to cache folder:", nowCacheRootFolder)
+	if pkg.IsDir(nowCacheRootFolder) == false {
+		err = os.MkdirAll(nowCacheRootFolder, os.ModePerm)
+		if err != nil {
+			logger.Fatalln("os.MkdirAll", err)
+		}
+	}
+	outVideoFPath := filepath.Join(nowCacheRootFolder, videoTitle+".mp4")
+	// 判断下载的目标目录下是否已经有的文件的大小于准备下载的文件大小是一样大的，如果是，则跳过，否则继续下载
+	if pkg.IsFile(outVideoFPath) == true {
+		logger.Infoln("Target Video File Exist:", outVideoFPath)
+		// 获取文件大小
+		fileInfo, err := os.Stat(outVideoFPath)
+		if err != nil {
+			logger.Fatalln("os.Stat", err)
+		}
+		if fileInfo.Size() == fileSize {
+			// 文件大小一样，跳过下载
+			logger.Infoln("Target Video File Already Downloaded:", outVideoFPath)
+			return outVideoFPath
+		} else {
+
+			if pkg.IsFile(filepath.Join(nowCacheRootFolder, videoDownloaded)) == true {
+				// 如果视频文件存在，且下载完成的标志位文件也存在，则认为下载完成了，无需再次下载
+				logger.Infoln("Target Video File Already Downloaded:", outVideoFPath)
+				return outVideoFPath
+			}
+			logger.Infoln("Target Video File Size Not Match, Delete it:", outVideoFPath)
+			err = os.Remove(outVideoFPath)
+			if err != nil {
+				logger.Fatalln("os.Remove", err)
+			}
+		}
+	}
+
+	logger.Infoln("Get Download Info ...")
+	downloadResult, err := result.Download(context.Background(), "")
+	if err != nil {
+		logger.Fatalln("result.Download", err)
+	}
+	defer downloadResult.Close()
+
 	progress := progressbar.NewOptions(
 		int(fileSize),
 		progressbar.OptionSetWriter(os.Stderr),
@@ -92,14 +129,7 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 		progressbar.OptionSetDescription("Downloading"),
 	)
 
-	logger.Infoln("Save to cache folder:", nowCacheRootFolder)
-	if pkg.IsDir(nowCacheRootFolder) == false {
-		err = os.MkdirAll(nowCacheRootFolder, os.ModePerm)
-		if err != nil {
-			logger.Fatalln("os.MkdirAll", err)
-		}
-	}
-	f, err := os.Create(filepath.Join(nowCacheRootFolder, "downloaded_video.mp4"))
+	f, err := os.Create(outVideoFPath)
 	if err != nil {
 		logger.Fatalln("os.Create", err)
 	}
@@ -119,12 +149,44 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 		logger.Fatalln("io.Copy", err)
 	}
 
+	// 写一个标志位文件到当前的目录下，表示已经下载完成
+	f, err = os.Create(filepath.Join(nowCacheRootFolder, videoDownloaded))
+	if err != nil {
+		logger.Fatalln("os.Create", err)
+	}
+	defer f.Close()
+
 	err = progress.Finish()
 	if err != nil {
 		logger.Fatalln("progress.Finish", err)
 	}
 
-	logger.Infoln("Download Video Done")
+	logger.Infoln("Download Video at:", outVideoFPath)
+
+	return outVideoFPath
+}
+
+func exportAudioFile(c settings.Configs, youtubeVideoFPath string) *ffmpeg_helper.FFMPEGInfo {
+
+	logger.Infoln("Export Audio File ...")
+	ff := ffmpeg_helper.NewFFMPEGHelper(logger.GetLogger(), filepath.Join(c.CacheRootFolder, "ffmpeg_cache"))
+	bok, ffmpegInfo, err := ff.ExportFFMPEGInfo(youtubeVideoFPath, ffmpeg_helper.Audio, ffmpeg_helper.MP3)
+	if err != nil {
+		logger.Fatalln("ff.ExportFFMPEGInfo", err)
+	}
+	if bok == false {
+		logger.Fatalln("ff.ExportFFMPEGInfo", "bok== false")
+	}
+
+	logger.Infoln("Export Audio Done")
+
+	// 导出了那些音频文件，列举出来
+	for _, a := range ffmpegInfo.AudioInfoList {
+		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s, GetName(): %s, GetLanguage(): %s\n",
+			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage(), a.GetName(), a.GetLanguage().String())
+	}
+
+	return ffmpegInfo
 }
 
 func main() {
@@ -149,8 +211,16 @@ func main() {
 	if err != nil {
 		logger.Fatalln("rod_helper.NewHttpClient", err)
 	}
+	// 先下载 youtube 的视频
+	youtubeVideoFPath := downloadYoutubeVideo(c, client, dlUrl)
+	// 然后调用 FFMPEG 进行音频的导出
+	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
 
-	downloadYoutubeVideo(c, client, dlUrl)
+	println("ffmpegInfo.AudioInfoList[0].Index", ffmpegInfo.AudioInfoList[0].Index)
 
 	logger.Infoln("Done")
 }
+
+const (
+	videoDownloaded = "downloaded"
+)

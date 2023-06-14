@@ -4,3 +4,6 @@
 /cmd/client_youtube/Logs
 /cmd/client_youtube/*.exe
 /cmd/client_youtube/LiSA - 紅蓮華 - THE FIRST TAKE/*.mp4
+/cmd/client_youtube/ffmpeg_cache/
+/cmd/client_youtube/LiSA - 紅蓮華 - THE FIRST TAKE/downloaded
+/cmd/client_youtube/etc/client_youtube.yaml
