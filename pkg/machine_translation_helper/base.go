@@ -32,13 +32,20 @@ func (m *MachineTranslationHelper) Process(opt Opts) {
 	if err != nil {
 		logger.Fatal("AddMachineTranslationTask error:", err)
 	}
-	//cancelTaskPackage, err := m.client.CancelTaskPackage(taskPackageResp.TaskPackageId)
-	//if err != nil {
-	//	logger.Fatal("CancelTaskPackage error:", err)
-	//}
-	//if cancelTaskPackage.Status != 1 {
-	//	logger.Fatal("CancelTaskPackage error:", cancelTaskPackage.Message)
-	//}
+	if opt.CancelThisTaskPackage == true {
+		// 取消任务包
+		logger.Infoln("Try CancelTaskPackage...")
+
+		cancelTaskPackage, err := m.client.CancelTaskPackage(taskPackageResp.TaskPackageId)
+		if err != nil {
+			logger.Fatal("CancelTaskPackage error:", err)
+		}
+		if cancelTaskPackage.Status != 1 {
+			logger.Fatal("CancelTaskPackage error:", cancelTaskPackage.Message)
+		}
+		logger.Infoln("CancelTaskPackage:", cancelTaskPackage.Status, cancelTaskPackage.Message)
+		return
+	}
 	// 查询本地的任务缓存信息
 	err = m.cache.Load()
 	if err != nil {
@@ -125,6 +132,7 @@ func (m *MachineTranslationHelper) Process(opt Opts) {
 }
 
 type Opts struct {
+	CancelThisTaskPackage bool   // 取消当前任务包
 	InputFPath            string // 输入文件路径
 	IsAudioOrSRT          bool   // 是否是音频或者字幕
 	AudioLang             string // 音频语言
@@ -135,8 +143,8 @@ type Opts struct {
 }
 
 type NowTaskPackageCacheInfo struct {
-	taskPackageID string // 任务包 ID
-	token         string // 任务包 Token
+	TaskPackageID string `json:"task_package_id"` // 任务包 ID
+	Token         string `json:"token"`           // 任务包 token
 }
 
 func NewNowTaskPackageCacheInfo() *NowTaskPackageCacheInfo {
@@ -144,19 +152,19 @@ func NewNowTaskPackageCacheInfo() *NowTaskPackageCacheInfo {
 }
 
 func (n *NowTaskPackageCacheInfo) GetTaskPackageID() string {
-	return n.taskPackageID
+	return n.TaskPackageID
 }
 
 func (n *NowTaskPackageCacheInfo) GetToken() string {
-	return n.token
+	return n.Token
 }
 
 func (n *NowTaskPackageCacheInfo) Update(taskPackageID, token string) error {
 	if taskPackageID != "" {
-		n.taskPackageID = taskPackageID
+		n.TaskPackageID = taskPackageID
 	}
 	if token != "" {
-		n.token = token
+		n.Token = token
 	}
 	return struct_json.ToFile(saveJsonCacheFileName, n)
 }
@@ -172,8 +180,8 @@ func (n *NowTaskPackageCacheInfo) Load() error {
 	if err != nil {
 		return err
 	}
-	n.taskPackageID = nn.taskPackageID
-	n.token = nn.token
+	n.TaskPackageID = nn.TaskPackageID
+	n.Token = nn.Token
 	return nil
 }
 

@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/ChineseSubFinder/csf-supplier-base v0.0.50 // indirect
+	github.com/ChineseSubFinder/csf-supplier-base v0.0.52 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/sevenzip v1.4.0 // indirect

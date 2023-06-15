@@ -28,6 +28,7 @@ func main() {
 
 	dlUrl := flag.String("yt_url", "", "the youtube video url")
 	videoLang := flag.String("yt_lang", "", "the youtube video language")
+	cancelThisTaskPackage := flag.Bool("cancel", false, "cancel this task package")
 
 	logger.SetLoggerLevel(logrus.InfoLevel)
 
@@ -73,6 +74,7 @@ func main() {
 	mth := machine_translation_helper.NewMachineTranslationHelper(tc)
 
 	mth.Process(machine_translation_helper.Opts{
+		CancelThisTaskPackage:        *cancelThisTaskPackage,
 		InputFPath:                   ffmpegInfo.AudioInfoList[0].FullPath,
 		IsAudioOrSRT:                 true,
 		AudioLang:                    *videoLang,
