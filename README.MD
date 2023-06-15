@@ -24,9 +24,11 @@
 
 2. 需要下载 Youtube 的视频下载程序：[yt-dlp](https://github.com/yt-dlp/yt-dlp/releases)，将这个`yu-dlp.exe`放到`C:\WorkSpace\videio_translation`中
 
-3. 在这个目录下新建一个 `etc` 目录
+3. 申请 ApiKey（待添加教程）
 
-4. 在 `etc` 目录下新建一个 `client_youtube.yaml` 文件，这个是该程序的配置文件
+4. 在这个目录下新建一个 `etc` 目录
+
+5. 在 `etc` 目录下新建一个 `client_youtube.yaml` 文件，这个是该程序的配置文件
 
    ```
    ServerBaseUrl: "xxx"
@@ -53,3 +55,6 @@
 client_youtube.exe -yt_url "https://www.youtube.com/watch?v=lhYGXYeMq_E"
 ```
 
+那么将在以下目录生成对应的下载视频的目录
+
+![image-20230615174406755](assets/image-20230615174406755.png)
