@@ -61,8 +61,9 @@ func main() {
 	// 然后调用 FFMPEG 进行音频的导出
 	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
 	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
-	println("ffmpegInfo.AudioInfoList[0].Index", ffmpegInfo.AudioInfoList[0].Index)
-
+	if len(ffmpegInfo.AudioInfoList) <= 0 {
+		logger.Fatalln("ffmpegInfo.AudioInfoList <= 0")
+	}
 	// 获取这个 youtubeVideoFPath 视频文件的文件名称，不包含后缀名
 	videoTitle := strings.TrimSuffix(filepath.Base(youtubeVideoFPath), filepath.Ext(youtubeVideoFPath))
 	// 获取这个 youtubeVideoFPath 视频文件的文件夹目录
@@ -72,7 +73,7 @@ func main() {
 	mth := machine_translation_helper.NewMachineTranslationHelper(tc)
 
 	mth.Process(machine_translation_helper.Opts{
-		InputFPath:                   youtubeVideoFPath,
+		InputFPath:                   ffmpegInfo.AudioInfoList[0].FullPath,
 		IsAudioOrSRT:                 true,
 		AudioLang:                    *videoLang,
 		TargetTranslationLang:        "CN",
@@ -248,7 +249,7 @@ func exportAudioFile(c settings.Configs, youtubeVideoFPath string) *ffmpeg_helpe
 
 	// 导出了那些音频文件，列举出来
 	for _, a := range ffmpegInfo.AudioInfoList {
-		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s\n",
+		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s",
 			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage())
 	}
 
