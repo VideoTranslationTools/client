@@ -9,3 +9,5 @@
 /cmd/client_youtube/etc/client_youtube.yaml
 /cmd/client_youtube/cache
 /cmd/client_youtube/*.json
+/cmd/client_base/etc/client_base.yaml
+/cmd/client_base/*.exe

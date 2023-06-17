@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
-	"github.com/ChineseSubFinder/csf-supplier-base/pkg/ffmpeg_helper"
 	"github.com/VideoTranslationTools/base/pkg/task_system"
+	npkg "github.com/VideoTranslationTools/client/pkg"
 	"github.com/VideoTranslationTools/client/pkg/machine_translation_helper"
 	"github.com/VideoTranslationTools/client/pkg/settings"
 	"github.com/WQGroup/logger"
@@ -60,7 +60,7 @@ func main() {
 	// 先下载 youtube 的视频
 	youtubeVideoFPath := downloadYoutubeVideo(c, client, *dlUrl)
 	// 然后调用 FFMPEG 进行音频的导出
-	ffmpegInfo := exportAudioFile(c, youtubeVideoFPath)
+	ffmpegInfo := npkg.ExportAudioFile(c.CacheRootFolder, youtubeVideoFPath)
 	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
 	if len(ffmpegInfo.AudioInfoList) <= 0 {
 		logger.Fatalln("ffmpegInfo.AudioInfoList <= 0")
@@ -89,21 +89,6 @@ func main() {
 const (
 	videoDownloaded = "downloaded"
 )
-
-type progressWriter struct {
-	writer     io.Writer
-	bar        *progressbar.ProgressBar
-	downloaded int64
-	total      int64
-}
-
-func (pw *progressWriter) Write(p []byte) (int, error) {
-	n := len(p)
-	pw.downloaded += int64(n)
-	pw.bar.Set64(pw.downloaded)
-	_, err := pw.writer.Write(p)
-	return n, err
-}
 
 // downloadYoutubeVideo 下载 Youtube 视频
 func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string) string {
@@ -204,12 +189,7 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 	}
 	defer f.Close()
 
-	pw := &progressWriter{
-		writer:     f,
-		bar:        progress,
-		downloaded: 0,
-		total:      fileSize,
-	}
+	pw := npkg.NewProgressWriter(f, progress, fileSize)
 
 	logger.Infoln("Wait for Downloading ...")
 
@@ -233,27 +213,4 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 	logger.Infoln("Download Video at:", outVideoFPath)
 
 	return outVideoFPath
-}
-
-func exportAudioFile(c settings.Configs, youtubeVideoFPath string) *ffmpeg_helper.FFMPEGInfo {
-
-	logger.Infoln("Export Audio File ...")
-	ff := ffmpeg_helper.NewFFMPEGHelper(logger.GetLogger(), filepath.Join(c.CacheRootFolder, "ffmpeg_cache"))
-	bok, ffmpegInfo, err := ff.ExportFFMPEGInfo(youtubeVideoFPath, ffmpeg_helper.Audio, ffmpeg_helper.MP3)
-	if err != nil {
-		logger.Fatalln("ff.ExportFFMPEGInfo", err)
-	}
-	if bok == false {
-		logger.Fatalln("ff.ExportFFMPEGInfo", "bok== false")
-	}
-
-	logger.Infoln("Export Audio Done")
-
-	// 导出了那些音频文件，列举出来
-	for _, a := range ffmpegInfo.AudioInfoList {
-		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s",
-			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage())
-	}
-
-	return ffmpegInfo
 }
