@@ -27,6 +27,8 @@ github.com/ChineseSubFinder/csf-supplier-base v0.0.51 h1:RynTN3la2Iin9Y80z9i27Dc
 github.com/ChineseSubFinder/csf-supplier-base v0.0.51/go.mod h1:SKOVZbJopJ9CWAmQhFbWoUxFya3swBn3+1pqzcZYA5w=
 github.com/ChineseSubFinder/csf-supplier-base v0.0.52 h1:HDMwMDl9jQGI50/X2fBZQnhIUpOK6Y81VtutbtZfjws=
 github.com/ChineseSubFinder/csf-supplier-base v0.0.52/go.mod h1:SKOVZbJopJ9CWAmQhFbWoUxFya3swBn3+1pqzcZYA5w=
+github.com/ChineseSubFinder/csf-supplier-base v0.50.3 h1:yIv7oM982Wv2Qr4YtVPPgtmcxgxp7tO4AmvH1ZaDjoo=
+github.com/ChineseSubFinder/csf-supplier-base v0.50.3/go.mod h1:SKOVZbJopJ9CWAmQhFbWoUxFya3swBn3+1pqzcZYA5w=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/WQGroup/logger v0.0.6 h1:qfm/ENVISK5RJeqrRmdL97Z6zW06YWJ6MVerPIFbtiU=
 github.com/WQGroup/logger v0.0.6/go.mod h1:kiRGU4lcqIVi9wBID4DMf7FhI9a8Iq7cadOlZgIO0ko=
