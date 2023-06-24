@@ -24,6 +24,10 @@ import (
 
 var configFile = flag.String("f", "etc/client_youtube.yaml", "the config file")
 
+func init() {
+	logger.Infoln("Version:", AppVersion)
+}
+
 func main() {
 
 	dlUrl := flag.String("yt_url", "", "the youtube video url")
@@ -214,3 +218,5 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 
 	return outVideoFPath
 }
+
+var AppVersion = "unknow"

@@ -15,6 +15,10 @@ import (
 
 var configFile = flag.String("f", "etc/client_base.yaml", "the config file")
 
+func init() {
+	logger.Infoln("Version:", AppVersion)
+}
+
 func main() {
 
 	videoFPath := flag.String("video", "", "the video file path")
@@ -58,3 +62,5 @@ func main() {
 
 	logger.Infoln("Done")
 }
+
+var AppVersion = "unknow"
