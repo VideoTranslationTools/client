@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/ChineseSubFinder/csf-supplier-base v0.50.3
+	github.com/VideoTranslationTools/base v0.1.2
 	github.com/WQGroup/logger v0.0.6
 	github.com/allanpk716/conf v0.1.2
 	github.com/allanpk716/rod_helper v0.0.82
