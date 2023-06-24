@@ -86,4 +86,8 @@ require (
 	gorm.io/gorm v1.25.1 // indirect
 )
 
-replace github.com/wader/goutubedl v0.0.0-20230607161020-2ec70c51c91b => github.com/allanpk716/goutubedl v0.0.0-20230607161020-2ec70c51c91b
+replace (
+	github.com/wader/goutubedl v0.0.0-20230607161020-2ec70c51c91b => github.com/allanpk716/goutubedl v0.0.0-20230607161020-2ec70c51c91b
+	github.com/go-creed/sat => github.com/allanpk716/sat v1.0.4
+	github.com/middelink/go-parse-torrent-name => github.com/allanpk716/go-parse-torrent-name v0.0.2
+)
