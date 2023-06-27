@@ -1,4 +1,4 @@
-project_name: client_base
+project_name: client_youtube
 
 env:
   - GO111MODULE=on
@@ -7,7 +7,9 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - id: linux-amd64-build
+  # ----------------------------------------
+  # base
+  - id: linux-amd64-build-base
     goos:
       - linux
     goarch:
@@ -16,7 +18,7 @@ builds:
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
 
-  - id: linux-armv7-build
+  - id: linux-armv7-build-base
     goos:
       - linux
     goarch:
@@ -27,7 +29,7 @@ builds:
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
 
-  - id: linux-arm64-build
+  - id: linux-arm64-build-base
     goos:
       - linux
     goarch:
@@ -36,12 +38,51 @@ builds:
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
 
-  - id: windows-build
+  - id: windows-build-base
     goos:
       - windows
     goarch:
       - amd64
     main: ./cmd/client_base/main.go
+    ldflags:
+      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+  # ----------------------------------------
+  # youtube
+  - id: linux-amd64-build-youtube
+    goos:
+      - linux
+    goarch:
+      - amd64
+    main: ./cmd/client_youtube/main.go
+    ldflags:
+      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+
+  - id: linux-armv7-build-youtube
+    goos:
+      - linux
+    goarch:
+      - arm
+    goarm:
+      - 7
+    main: ./cmd/client_youtube/main.go
+    ldflags:
+      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+
+  - id: linux-arm64-build-youtube
+    goos:
+      - linux
+    goarch:
+      - arm64
+    main: ./cmd/client_youtube/main.go
+    ldflags:
+      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+
+  - id: windows-build-youtube
+    goos:
+      - windows
+    goarch:
+      - amd64
+    main: ./cmd/client_youtube/main.go
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
 
@@ -65,3 +106,4 @@ changelog:
       - "^test:"
       - "^TestData:"
       - "^TestCode:"
+      - "^assets:"
