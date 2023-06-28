@@ -1,4 +1,4 @@
-project_name: client_base
+project_name: client
 
 env:
   - GO111MODULE=on
@@ -7,56 +7,64 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - id: linux-amd64-build
+  - id: build-base
     goos:
       - linux
-    goarch:
-      - amd64
-    main: ./cmd/client_base/main.go
-    ldflags:
-      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
-
-  - id: linux-armv7-build
-    goos:
-      - linux
-    goarch:
-      - arm
-    goarm:
-      - 7
-    main: ./cmd/client_base/main.go
-    ldflags:
-      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
-
-  - id: linux-arm64-build
-    goos:
-      - linux
-    goarch:
-      - arm64
-    main: ./cmd/client_base/main.go
-    ldflags:
-      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
-
-  - id: windows-build
-    goos:
       - windows
+      - darwin
     goarch:
       - amd64
+      - arm64
+    goarm:
+      - 6
+      - 7
+    binary_name:
+      - "{{ .ProjectName }}_base"
     main: ./cmd/client_base/main.go
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+      -
+  - id: build-youtube
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 6
+      - 7
+    binary_name:
+      - "{{ .ProjectName }}_youtube"
+    main: ./cmd/client_youtube/main.go
+    ldflags:
+      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
+
 
 archives:
-  - id: archive
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+  - id: archive-base
+    name_template: "{{ .ProjectName }}_base-{{ .Version }}-{{ .Os }}-{{ .Arch }}-base"
     replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       amd64: x86_64
+
+  - id: archive-youtube
+    name_template: "{{ .ProjectName }}_youtube-{{ .Version }}-{{ .Os }}-{{ .Arch }}-youtube"
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      amd64: x86_64
+
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -65,3 +73,4 @@ changelog:
       - "^test:"
       - "^TestData:"
       - "^TestCode:"
+      - "^assets:"
