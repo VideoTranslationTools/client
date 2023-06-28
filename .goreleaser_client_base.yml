@@ -18,8 +18,7 @@ builds:
     goarm:
       - 6
       - 7
-    binary_name:
-      - "{{ .ProjectName }}_base"
+    binary: "{{ .ProjectName }}_base"
     main: ./cmd/client_base/main.go
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
@@ -35,8 +34,7 @@ builds:
     goarm:
       - 6
       - 7
-    binary_name:
-      - "{{ .ProjectName }}_youtube"
+    binary: "{{ .ProjectName }}_youtube"
     main: ./cmd/client_youtube/main.go
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
@@ -44,7 +42,7 @@ builds:
 
 archives:
   - id: archive-base
-    name_template: "{{ .ProjectName }}_base-{{ .Version }}-{{ .Os }}-{{ .Arch }}-base"
+    name_template: "{{ .ProjectName }}_base-{{ .Version }}-{{ .os }}-{{ .arch }}-base"
     replacements:
       darwin: Darwin
       linux: Linux
@@ -52,7 +50,7 @@ archives:
       amd64: x86_64
 
   - id: archive-youtube
-    name_template: "{{ .ProjectName }}_youtube-{{ .Version }}-{{ .Os }}-{{ .Arch }}-youtube"
+    name_template: "{{ .ProjectName }}_youtube-{{ .Version }}-{{ .os }}-{{ .arch }}-youtube"
     replacements:
       darwin: Darwin
       linux: Linux
@@ -61,6 +59,7 @@ archives:
 
 checksum:
   name_template: "checksums.txt"
+  algorithm: sha256
 
 snapshot:
   name_template: "{{ .Tag }}-next"
