@@ -1,0 +1,3 @@
+builds:
+  - config: .goreleaser_client_base.yml
+  - config: .goreleaser_client_youtube.yml
