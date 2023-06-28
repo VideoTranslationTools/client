@@ -1,7 +1,5 @@
 # 视频机翻客户端
 
-> 能用了，但是暂时不打开马上开放。原因还是**风险控制**。
->
 > 还在更新使用教程和功能...
 
 ## 前言
@@ -12,40 +10,53 @@
 
 那么本项目就期望在使用者电脑性能弱鸡（CPU 一般，没有 GPU）的时候，也足够完成这件事情。
 
-期望使用者在得到翻译字幕后，如果觉得够用，也可以分享到各大字幕网站，供更多的人享用。如果使用者有能力校对字幕，那就更佳。
-
 使用者需要有一个预期，就是这个项目的翻译质量显然是无法跟专业的字幕人员去对比的。同时生成的字幕断句合理性也有极大的提升空间。
 
 目前是强制生成**中文**的**双语**字幕（也许后期会开放其他语言的翻译支持）。
 
 ## 如何使用？
 
-其实机翻任务可以是提交一个视频，也可以是一个字幕。这里会逐步实现多个客户端去应这些需求，也许也会统一集成在一起。
+其实机翻任务可以是提交一个视频，也可以是一个字幕。
 
-以目前的精力，暂时会先输出两个 Client：
+这个程序的目标是传入:
 
-* youtube 的视频机翻功能
-* 通用本地视频、字幕的机翻功能
+* 一个 youtube 的 URL ，然后在本地下载然后进行云端的机翻操作，再下载翻译好的字幕文件下来；
+* 一个本地的视频，然后本地提取音频，进行云端的机翻操作，再下载翻译好的字幕文件下来；
+* 一个本地的字幕，进行云端的机翻操作，再下载翻译好的字幕文件下来；
 
-### client_youtube
+可以接受传入的参数：
 
-这个程序的目标是传入一个 youtube 的 URL ，然后在本地下载然后进行云端的机翻操作，再下载翻译好的字幕文件下来。
+```shell
+machine_translator_client.exe -video "C:\\123.mp4"  # 机翻一个本地的视频
+machine_translator_client.exe -subtitle "C:\\123.srt" # 机翻一个本地的字幕
+machine_translator_client.exe -url "https://www.youtube.com/watch?v=lhYGXYeMq_E" # 机翻一个在线的 youtube 的视频
+
+machine_translator_client.exe -video "C:\\123.mp4" -lang "en"  # 机翻一个本地的视频，指定这个视频的语言是 en
+```
+
+支持指定的语言类型见下图：
+
+<img src="assets/image-20230628150858201.png" alt="image-20230628150858201" style="zoom:50%;" />
+
+
 
 举个例子：（这里假定你的系统是 Windows，请举一反三）
 
 现在有一个 Youtube 的视频：https://www.youtube.com/watch?v=lhYGXYeMq_E
 
-想要获取对应的中文字幕。那么可以使用本项目提供的 [client_youtube](https://github.com/VideoTranslationTools/client/tree/master/cmd/client_youtube)
+想要获取对应的中文字幕。那么可以使用本项目提供的 [VideoTranslationTools/client](https://github.com/VideoTranslationTools/client/releases)
 
 1. 先下载这个程序，放到 `C:\WorkSpace\videio_translation`
 
 2. 需要下载 Youtube 的视频下载程序：[yt-dlp](https://github.com/yt-dlp/yt-dlp/releases)，将这个`yu-dlp.exe`放到`C:\WorkSpace\videio_translation`中
 
-3. 申请 ApiKey（待添加教程）
+3. 安装 ffmpeg 和 ffprobe，确保你的系统全局能够在控制台访问它们（不行你就丢上面这个目录中也行）；
 
-4. 在这个目录下新建一个 `etc` 目录
+4. 申请 ApiKey（待添加教程）
 
-5. 在 `etc` 目录下新建一个 `client_youtube.yaml` 文件，这个是该程序的配置文件示例
+5. 在这个目录下新建一个 `etc` 目录
+
+6. 在 `etc` 目录下新建一个 `config.yaml` 文件，这个是该程序的配置文件示例
 
    ```
    ServerBaseUrl: "xxx"
@@ -74,7 +85,7 @@
 基本的使用的参数为：
 
 ```shell
-client_youtube.exe -yt_url "https://www.youtube.com/watch?v=lhYGXYeMq_E"
+machine_translator_client.exe -url "https://www.youtube.com/watch?v=lhYGXYeMq_E"
 ```
 
 那么将在以下目录生成对应的下载视频的目录：
@@ -104,10 +115,6 @@ client_youtube.exe -yt_url "https://www.youtube.com/watch?v=lhYGXYeMq_E"
 <img src="assets/image-20230616113154429.png" alt="image-20230616113154429" style="zoom:50%;" />
 
 ## 风险控制（正在开发...）
-
-> 由于一些原因，怎么说呢，如果这个功能不能被开发出来，或者效果不满意，大概率，这个项目就弃了。不开玩笑。
->
-> 但是单机版其实开发起来难度不大，大的是对应的深度学习的运行环境麻烦，下载大型模型麻烦。也许某天这些部署的问题有人搞定了，那么还要啥云端版本，单机没风险不更好嘛。
 
 因为本项目属于“用爱发电”，所以避免一些问题，会在字幕翻译**前**进行内容风险控制和评估（关键词、或者整体文字的大意内容），
 
