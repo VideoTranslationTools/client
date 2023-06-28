@@ -1,101 +1,25 @@
-package main
+package youtube
 
 import (
 	"context"
-	"flag"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
-	"github.com/VideoTranslationTools/base/pkg/task_system"
 	npkg "github.com/VideoTranslationTools/client/pkg"
-	"github.com/VideoTranslationTools/client/pkg/machine_translation_helper"
 	"github.com/VideoTranslationTools/client/pkg/settings"
 	"github.com/WQGroup/logger"
-	"github.com/allanpk716/conf"
-	"github.com/allanpk716/rod_helper"
 	"github.com/go-resty/resty/v2"
 	"github.com/schollz/progressbar/v3"
-	"github.com/sirupsen/logrus"
 	"github.com/wader/goutubedl"
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
 )
-
-var configFile = flag.String("f", "etc/client_youtube.yaml", "the config file")
-
-func init() {
-	logger.Infoln("Version:", AppVersion)
-}
-
-func main() {
-
-	dlUrl := flag.String("yt_url", "", "the youtube video url")
-	videoLang := flag.String("yt_lang", "", "the youtube video language")
-	cancelThisTaskPackage := flag.Bool("cancel", false, "cancel this task package")
-
-	logger.SetLoggerLevel(logrus.InfoLevel)
-
-	flag.Parse()
-
-	if *dlUrl == "" {
-		logger.Fatalln("yt_url is empty")
-	}
-
-	if *videoLang == "" {
-		logger.Infoln("yt_lang is empty, will auto detect language")
-	}
-
-	var c settings.Configs
-	conf.MustLoad(*configFile, &c)
-
-	// 初始化代理设置
-	logger.Infoln("InitFakeUA ...")
-	rod_helper.InitFakeUA(true, "", "")
-	opt := rod_helper.NewHttpClientOptions(5 * time.Second)
-	if c.ProxyType != "no" {
-		// 设置代理
-		opt.SetHttpProxy(c.ProxyUrl)
-	}
-	client, err := rod_helper.NewHttpClient(opt)
-	if err != nil {
-		logger.Fatalln("rod_helper.NewHttpClient", err)
-	}
-	// 先下载 youtube 的视频
-	youtubeVideoFPath := downloadYoutubeVideo(c, client, *dlUrl)
-	// 然后调用 FFMPEG 进行音频的导出
-	ffmpegInfo := npkg.ExportAudioFile(c.CacheRootFolder, youtubeVideoFPath)
-	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
-	if len(ffmpegInfo.AudioInfoList) <= 0 {
-		logger.Fatalln("ffmpegInfo.AudioInfoList <= 0")
-	}
-	// 获取这个 youtubeVideoFPath 视频文件的文件名称，不包含后缀名
-	videoTitle := strings.TrimSuffix(filepath.Base(youtubeVideoFPath), filepath.Ext(youtubeVideoFPath))
-	// 获取这个 youtubeVideoFPath 视频文件的文件夹目录
-	videoRootFolder := filepath.Dir(youtubeVideoFPath)
-	// 实例化一个 TaskSystemClient
-	tc := task_system.NewTaskSystemClient(c.ServerBaseUrl, c.ApiKey)
-	mth := machine_translation_helper.NewMachineTranslationHelper(tc)
-
-	mth.Process(machine_translation_helper.Opts{
-		CancelThisTaskPackage:        *cancelThisTaskPackage,
-		InputFPath:                   ffmpegInfo.AudioInfoList[0].FullPath,
-		IsAudioOrSRT:                 true,
-		AudioLang:                    *videoLang,
-		TargetTranslationLang:        "CN",
-		DownloadedFileSaveFolderPath: videoRootFolder,
-		TranslatedSRTFileName:        videoTitle + ".srt",
-	})
-
-	logger.Infoln("Done")
-}
 
 const (
-	videoDownloaded = "downloaded"
+	VideoDownloaded = "downloaded"
 )
 
-// downloadYoutubeVideo 下载 Youtube 视频
-func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string) string {
+// DownloadVideo 下载 Youtube 视频
+func DownloadVideo(c settings.Configs, client *resty.Client, dlUrl string) string {
 
 	logger.Infoln("Try Download Video From", dlUrl)
 
@@ -157,7 +81,7 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 			return outVideoFPath
 		} else {
 
-			if pkg.IsFile(filepath.Join(nowCacheRootFolder, videoDownloaded)) == true {
+			if pkg.IsFile(filepath.Join(nowCacheRootFolder, VideoDownloaded)) == true {
 				// 如果视频文件存在，且下载完成的标志位文件也存在，则认为下载完成了，无需再次下载
 				logger.Infoln("Target Video File Already Downloaded:", outVideoFPath)
 				return outVideoFPath
@@ -203,7 +127,7 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 	}
 
 	// 写一个标志位文件到当前的目录下，表示已经下载完成
-	f, err = os.Create(filepath.Join(nowCacheRootFolder, videoDownloaded))
+	f, err = os.Create(filepath.Join(nowCacheRootFolder, VideoDownloaded))
 	if err != nil {
 		logger.Fatalln("os.Create", err)
 	}
@@ -218,5 +142,3 @@ func downloadYoutubeVideo(c settings.Configs, client *resty.Client, dlUrl string
 
 	return outVideoFPath
 }
-
-var AppVersion = "unknow"

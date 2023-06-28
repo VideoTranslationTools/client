@@ -1,4 +1,4 @@
-project_name: client
+project_name: machine_translator_client
 
 env:
   - GO111MODULE=on
@@ -18,52 +18,22 @@ builds:
     goarm:
       - 6
       - 7
-    binary: "{{ .ProjectName }}_base"
     main: ./cmd/client_base/main.go
     ldflags:
       - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
-      -
-  - id: build-youtube
-    goos:
-      - linux
-      - windows
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    goarm:
-      - 6
-      - 7
-    binary: "{{ .ProjectName }}_youtube"
-    main: ./cmd/client_youtube/main.go
-    ldflags:
-      - -s -w --extldflags "-static -fpic" -X main.AppVersion=v{{ .Version }}
-
 
 archives:
-  - id: archive-base
-    name_template: "{{ .ProjectName }}_base-{{ .Version }}-{{ .os }}-{{ .arch }}-base"
+  - id: archive
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       amd64: x86_64
-
-  - id: archive-youtube
-    name_template: "{{ .ProjectName }}_youtube-{{ .Version }}-{{ .os }}-{{ .arch }}-youtube"
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      amd64: x86_64
-
 checksum:
   name_template: "checksums.txt"
-  algorithm: sha256
-
 snapshot:
   name_template: "{{ .Tag }}-next"
-
 changelog:
   sort: asc
   filters:

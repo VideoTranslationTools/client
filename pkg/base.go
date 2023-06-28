@@ -29,8 +29,13 @@ func (pw *ProgressWriter) Write(p []byte) (int, error) {
 
 func ExportAudioFile(CacheRootFolder, videoFPath string) *ffmpeg_helper.FFMPEGInfo {
 
-	logger.Infoln("Export Audio File ...")
+	logger.Infoln("Check ffmpeg ...")
 	ff := ffmpeg_helper.NewFFMPEGHelper(logger.GetLogger(), filepath.Join(CacheRootFolder, "ffmpeg_cache"))
+	_, err := ff.Version()
+	if err != nil {
+		logger.Fatalln("ff.Version", err)
+	}
+	logger.Infoln("Export Audio File ...")
 	bok, ffmpegInfo, err := ff.ExportFFMPEGInfo(videoFPath, ffmpeg_helper.Audio, ffmpeg_helper.MP3)
 	if err != nil {
 		logger.Fatalln("ff.ExportFFMPEGInfo", err)
