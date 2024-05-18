@@ -14,3 +14,4 @@
 /cmd/client_base/etc/config.yaml
 /cmd/client_base/Logs/*.log
 /cmd/client_base/cache
+/ffmpeg_cache/
