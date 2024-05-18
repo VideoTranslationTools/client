@@ -18,10 +18,34 @@ type Task struct {
 	Language   string `json:"language"`
 }
 
+/*
+Status:
+   pending = 1
+   running = 2
+   finished = 3
+   error = 4
+*/
 type SendTaskReply struct {
 	Code   int    `json:"code"`
 	Msg    string `json:"msg"`
 	Status int    `json:"status"`
+}
+
+func (s SendTaskReply) GetStatus() TaskStatus {
+	return TaskStatus(s.Status)
+}
+
+type TaskStatus int
+
+const (
+	Pending TaskStatus = iota + 1
+	Running
+	Finished
+	Error
+)
+
+func (t TaskStatus) String() string {
+	return [...]string{"Pending", "Running", "Finished", "Error"}[(int)(t)-1]
 }
 
 func NewWhisperClient(serverURL, token string) *WhisperClient {

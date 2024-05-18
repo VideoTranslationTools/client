@@ -5,6 +5,7 @@ import (
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg"
 	"github.com/ChineseSubFinder/csf-supplier-base/pkg/ffmpeg_helper"
 	npkg "github.com/VideoTranslationTools/client/pkg"
+	"github.com/VideoTranslationTools/client/pkg/whisper_client"
 	"github.com/WQGroup/logger"
 	"github.com/sirupsen/logrus"
 	"path/filepath"
@@ -13,6 +14,11 @@ import (
 
 func init() {
 	logger.Infoln("Version:", AppVersion)
+
+	serverURL := "http://127.0.0.1:5000"
+	token := "1234567890"
+
+	whisperClient = whisper_client.NewWhisperClient(serverURL, token)
 }
 
 func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
@@ -50,6 +56,7 @@ func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 		}
 	} else {
 		// 需要转换音频文件为字幕文件
+
 	}
 
 	return needTranslateSRTFPath
@@ -92,6 +99,7 @@ func main() {
 }
 
 var AppVersion = "unknow"
+var whisperClient *whisper_client.WhisperClient
 
 const (
 	SrtExt = ".srt"
