@@ -54,3 +54,36 @@ func ExportAudioFile(CacheRootFolder, videoFPath string) *ffmpeg_helper.FFMPEGIn
 
 	return ffmpegInfo
 }
+
+func ExportSubtitleAndAudioFile(CacheRootFolder, videoFPath string) *ffmpeg_helper.FFMPEGInfo {
+
+	logger.Infoln("Check ffmpeg ...")
+	ff := ffmpeg_helper.NewFFMPEGHelper(logger.GetLogger(), filepath.Join(CacheRootFolder, "ffmpeg_cache"))
+	_, err := ff.Version()
+	if err != nil {
+		logger.Fatalln("ff.Version", err)
+	}
+	logger.Infoln("Export Subtitle And Audio File ...")
+	bok, ffmpegInfo, err := ff.ExportFFMPEGInfo(videoFPath, ffmpeg_helper.SubtitleAndAudio, ffmpeg_helper.MP3)
+	if err != nil {
+		logger.Fatalln("ff.ExportFFMPEGInfo", err)
+	}
+	if bok == false {
+		logger.Fatalln("ff.ExportFFMPEGInfo", "bok== false")
+	}
+
+	logger.Infoln("Export Subtitle And Audio Done")
+
+	// 导出了那些音频文件，列举出来
+	for _, a := range ffmpegInfo.AudioInfoList {
+		logger.Infof("Audio Index: %d, CodecType: %s, CodecName: %s, Duration: %f, GetOrgLanguage(): %s",
+			a.Index, a.CodecType, a.CodecName, a.Duration, a.GetOrgLanguage())
+	}
+	// 导出了哪些字幕文件，列举出来
+	for _, s := range ffmpegInfo.SubtitleInfoList {
+		logger.Infof("Subtitle Index: %d, CodecType: %s, CodecName: %s, Name: %s",
+			s.Index, s.CodecType, s.CodecName, s.GetName())
+	}
+
+	return ffmpegInfo
+}

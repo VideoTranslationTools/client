@@ -1,125 +1,110 @@
 # 视频机翻客户端
 
-> 还在更新使用教程和功能...
+> 教程更新中，每个模块都完成了，需要整合起来，便于一般用户使用
 
 ## 前言
 
-本项目的初衷是为了更好的看国外没有字幕的视频（可能是 Youtube or 一些纪录片），那么就需要能够做一个机翻的工具来生成字幕。
+本项目的目标是实现一套程序，能够让用户在一台家用 PC 上，完成视频的机翻工作。
 
-同时对于使用者，也希望能够尽可能简单的使用。比如，让使用者去安装对应的深度学习的支持库和环境，大概率难。
+因为个人不喜欢依赖第三方网络提供的服务，所以，这个机翻的工具其实早就拼凑出来了，只不过不能完全在单机上全部做完，就迟迟没有下文。
 
-那么本项目就期望在使用者电脑性能弱鸡（CPU 一般，没有 GPU）的时候，也足够完成这件事情。
+随着开源的 LLM 越发强大，本项目的最大的一个瓶颈（任意语言翻译到中文）暂时看来是有满意的解决方案了。
 
-使用者需要有一个预期，就是这个项目的翻译质量显然是无法跟专业的字幕人员去对比的。同时生成的字幕断句合理性也有极大的提升空间。
-
-目前是强制生成**中文**的**双语**字幕（也许后期会开放其他语言的翻译支持）。
-
-## 如何使用？
-
-其实机翻任务可以是提交一个视频，也可以是一个字幕。
-
-这个程序的目标是传入:
-
-* 一个 youtube 的 URL ，然后在本地下载然后进行云端的机翻操作，再下载翻译好的字幕文件下来。**输出路径在**：cache 下的对应 youtube 视频名称文件夹下；
-* 一个本地的视频，然后本地提取音频，进行云端的机翻操作，再下载翻译好的字幕文件下来。输出的路径在：对应视频文件目录下 xxx_translated.srt
-* 一个本地的字幕，进行云端的机翻操作，再下载翻译好的字幕文件下来。**输出的路径在**：对应字幕文件目录下 xxx_translated.srt
-
-可以接受传入的参数：
-
-```shell
-machine_translator_client.exe -video "C:\\123.mp4"  # 机翻一个本地的视频
-machine_translator_client.exe -subtitle "C:\\123.srt" # 机翻一个本地的字幕
-machine_translator_client.exe -url "https://www.youtube.com/watch?v=lhYGXYeMq_E" # 机翻一个在线的 youtube 的视频
-
-machine_translator_client.exe -video "C:\\123.mp4" -lang "en"  # 机翻一个本地的视频，指定这个视频的语言是 en
-```
-
-支持指定的语言类型见下图：
-
-<img src="assets/image-20230628150858201.png" alt="image-20230628150858201" style="zoom:50%;" />
-
-
-
-举个例子：（这里假定你的系统是 Windows，请举一反三）
-
-现在有一个 Youtube 的视频：https://www.youtube.com/watch?v=lhYGXYeMq_E
-
-想要获取对应的中文字幕。那么可以使用本项目提供的 [VideoTranslationTools/client](https://github.com/VideoTranslationTools/client/releases)
-
-1. 先下载这个程序，放到 `C:\WorkSpace\videio_translation`
-
-2. 需要下载 Youtube 的视频下载程序：[yt-dlp](https://github.com/yt-dlp/yt-dlp/releases)，将这个`yu-dlp.exe`放到`C:\WorkSpace\videio_translation`中
-
-3. 安装 ffmpeg 和 ffprobe，确保你的系统全局能够在控制台访问它们（不行你就丢上面这个目录中也行）；
-
-4. 申请 ApiKey（待添加教程）
-
-5. 在这个目录下新建一个 `etc` 目录
-
-6. 在 `etc` 目录下新建一个 `config.yaml` 文件，这个是该程序的配置文件示例
-
-   ```
-   ServerBaseUrl: "xxx"
-   ApiKey: "123456"
-   ProxyType: "http"
-   ProxyUrl: "http://192.168.50.252:20171"
-   CacheRootFolder: ".\\cache"
-   YTdlpFilePath: "C:\\WorkSpace\\youtube\\yt-dlp.exe"
-   ```
-
-> ServerBaseUrl： 机翻服务器的 API 地址
+> 既然是机翻，那么需要有一个预期，不可能做到人类级别的翻译，至少近期不可能
 >
-> ApiKey：用户的密钥（每天有使用次数限制）
+> 如果单机民用可以部署的 LLM 出来了，更新这个翻译的部分就OK
+
+## 项目最低运行要求
+
+说是家用 PC 就行，也不至于没有最低的要求，这个是考虑到语音识别、翻译的效果、速度。
+
+建议：
+
+* 内存至少 8GB
+* 显卡 3060 12GB
+
+至少本人是这个配置，就足够跑起来。如果你的配置达不到，也不是不能用，就是需要花费 10-20 倍以上的时间去完成相同的任务。
+
+## 机翻的速度
+
+这里速度的测试估算是在以下硬件上得到的：
+
+* CPU：i5  10400F
+* 内存：32GB
+* 显卡：3060 12GB
+* 硬盘：固态
+
+视频提取音频和内置字幕，这个一般都挺快的，5min 之内足够
+
+> 注意，如果你的视频不是在本地，比如是在网络或者局域网，那么肯定会更慢
+
+语音转字幕的耗时大概可以这样估算：语音的时长 / 20 = 执行时间
+
+> 一个语音 20 min，那么大概需要 1 min 进行语音的提取。这个是理想情况，实际上可能这个 20 的系数会变为 14 或者更低。
+
+> 注意，如果你的视频不是在本地，比如是在网络或者局域网，那么肯定会更慢
+
+字幕的翻译耗时：10个对白，大概耗时 25 - 30s
+
+## 项目依赖
+
+有以下几个核心的模块是需要单独提及的，这些是需要安装的，或者至少要放到对应的目录来使用的
+
+* FFMPEG
+* ollama
+* whisperx
+
+## 处理流程
+
+大致的处理流程如下图
+
+<img src="assets/Snipaste_2024-05-18_11-06-06.png" alt="Snipaste_2024-05-18_11-06-06" style="zoom: 33%;" />
+
+## 如何单机部署
+
+如果你家的网络能够流程的访问国际网络，那么，支持的模型的下载都是可以全自动的。
+
+> 最起码还是要能够访问国际网络的哈，完全访问不了就肯定部署不起来的
+
+如果访问国际网络不太稳定，那么就需要把一些大的模型提前下载下来，配置一下也是可以使用的。考虑到这一点，现在的教程优先描述，如何把需要缓存的模型先下载下来，再部署使用。
+
+> 有一些运行的支持库还是要求联网下载的，暂时没想好怎么解决这个部分，这个部分是 whisperx 的支持，大概 300MB 左右，只能假定你能够访问国际网络下载到这些支持吧。
+
+### 01 下载资源
+
+首先你需要去教程最后找到《资源文件下载》，把里面截图中的都下载下来，放到一个目录中。比如：`C:\temp`，请根据实际你的目录来调整，因为这些资源很大，11GB 左右。
+
+![image-20240518141525922](assets/image-20240518141525922.png)
+
+### 02 安装 whisper
+
+1. `C:\temp\whisper_model` 中`models--Systran--faster-whisper-large-v3.zip`解压到`C:\temp\whisper_model` 中，应该得到如下目录结构
+
+> `C:\temp\whisper_model\models--Systran--faster-whisper-large-v3` 
+
+2. 理论上可能需要安装 CUDA 11.8 的开发包，但是现在 whisper_server 的打包不确定是否搞定这个支持库，还需要找一台“干净”的机器来做实验才知道
+
+### 03安装 ollama
+
+1. 根据 ollama 官方引导，安装：[Download Ollama on Windows](https://ollama.com/download)
+2. 设置系统环境变量`OLLAMA_MODELS`，内容为`C:\temp\ollama_model`
+3. `C:\temp\ollama_model` 中`models.zip`解压到`C:\temp\ollama_model` 中，应该得到如下目录结构
+
+> `C:\temp\ollama_model\manifests` 
 >
-> 代理设置：
->
-> 如果你所在的地区访问 Youtube 有限制
->
-> * ProxyType: 可以填写 `"no"、"http"、"socks5"`，不启用就是 `"no"`
-> * ProxyUrl:  `"http://192.168.50.252:20171"` 请举一反三的设置
->
-> CacheRootFolder：这个是缓存的目录，也是下载 Youtube 视频的缓存目录，同时也是字幕最终的存放目录。会根据下载的视频标题来新建目录存储。
->
-> YTdlpFilePath：这个是 Youtube 下载器的存放位置。
+> `C:\temp\ollama_model\blobs` 
 
-基本的使用的参数为：
+4. 在命令行中使用`ollama list`查看本地的模型，应该有以下两个模型
 
-```shell
-machine_translator_client.exe -url "https://www.youtube.com/watch?v=lhYGXYeMq_E"
-```
+![image-20240518141857814](assets/image-20240518141857814.png)
 
-那么将在以下目录生成对应的下载视频的目录：
+> 如果你网络流畅，可以直接用 `ollama pull allanpk716/translate_srt:latest` 来获取最新的翻译模型
 
-![image-20230615174406755](assets/image-20230615174406755.png)
+## 如何使用
 
-下面是翻译效果：
+等待完善文档
 
-<img src="assets/IMG_3468.png" alt="IMG_3468" style="zoom: 33%;" />
+## 资源文件下载
 
-<img src="assets/IMG_3469.png" alt="IMG_3469" style="zoom: 33%;" />
-
-## 字幕校对
-
-现成的工具很多，这里推荐一个：[Happy Scribe: Audio Transcription & Video Subtitles](https://www.happyscribe.com/)
-
-如果你有更好推荐的，可以提 issues。
-
-## 后续的期望
-
-如下图，本程序的划分了 4 个类型的 Worker 工作者（每个类型的工作者可以有若干个），架构思路是分布式任务系统。
-
-目前项目提供了云端基础的计算服务，大家可以先玩。如果后期算力瓶颈了，工作者模块的代码也成熟了，会发布出来。这样有富于算力的童鞋们可以在你的设备上进行部署，分摊计算压力。
-
-云服务器的代码暂时不打算开源，因为跟之前一些项目耦合度较高，还需要重构分离功能。
-
-<img src="assets/image-20230616113154429.png" alt="image-20230616113154429" style="zoom:50%;" />
-
-## 风险控制（正在开发...）
-
-因为本项目属于“用爱发电”，所以避免一些问题，会在字幕翻译**前**进行内容风险控制和评估（关键词、或者整体文字的大意内容），
-
-## 隐私
-
-因为会有云端计算功能，所以一定会上传对应的音频和字幕到云服务器，服务器会在 1 天后自动删除文件，同时任务如果 1 天内没有执行完毕也会被删除。
-
-> 如果后续开放第三方的 Worker 接入进来，还需要重新设计确保拿到的数据在硬盘上是加密的。（同理因为这个原因也可能不打算公开 Worker）
+链接：https://pan.baidu.com/s/19hbbaxrZhGh5dRTXtDzCiA 
+提取码：s53x
