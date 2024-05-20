@@ -8,6 +8,7 @@ import (
 	"github.com/VideoTranslationTools/client/pkg/whisper_client"
 	"github.com/WQGroup/logger"
 	"github.com/sirupsen/logrus"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -27,6 +28,11 @@ func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 	needConvertAudio2Srt := false
 	if len(ffmpegInfo.SubtitleInfoList) <= 0 {
 		needConvertAudio2Srt = true
+	}
+	if needConvertAudio2Srt == true {
+		logger.Infoln("Need Convert Audio File To SRT File ...")
+	} else {
+		logger.Infoln("Use Exist Video Insider SRT File ...")
 	}
 	// 获取这个 audioTitle 音频文件的文件名称，不包含后缀名
 	audioFPath := ffmpegInfo.AudioInfoList[0].FullPath
@@ -55,8 +61,22 @@ func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 			needTranslateSRTFPath = ffmpegInfo.SubtitleInfoList[0].FullPath
 		}
 	} else {
-		// 需要转换音频文件为字幕文件
 
+		// 需要启动 WhisperX 的服务器
+		whisper_client.StartWhisperServer()
+		// 需要转换音频文件为字幕文件
+		err := whisper_client.ProcessAudio2Srt(whisperClient, audioFPath, "")
+		if err != nil {
+			logger.Fatalln("whisper_client.ProcessAudio2Srt error:", err)
+			return ""
+		}
+		// 得到的字幕就是 audioFPath 替换后缀名为 srt 即可
+		needTranslateSRTFPath = strings.ReplaceAll(audioFPath, path.Ext(audioFPath), SrtExt)
+		if pkg.IsFile(needTranslateSRTFPath) == false {
+			logger.Fatalln("needTranslateSRTFPath is not exist")
+		}
+		//
+		whisper_client.StopWhisperServer()
 	}
 
 	return needTranslateSRTFPath

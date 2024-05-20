@@ -38,8 +38,8 @@ cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3f
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/ChineseSubFinder/csf-supplier-base v0.50.3 h1:yIv7oM982Wv2Qr4YtVPPgtmcxgxp7tO4AmvH1ZaDjoo=
-github.com/ChineseSubFinder/csf-supplier-base v0.50.3/go.mod h1:SKOVZbJopJ9CWAmQhFbWoUxFya3swBn3+1pqzcZYA5w=
+github.com/ChineseSubFinder/csf-supplier-base v1.0.1 h1:r5L5Rrrs7BGRPi/nccdb2jPPvwWBv6cQ5jWrjC9w8rA=
+github.com/ChineseSubFinder/csf-supplier-base v1.0.1/go.mod h1:8kGrlV2jRndur6U5XPVNlOM62yFsaYkBOPXsK+pvG5E=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/VideoTranslationTools/base v0.1.2 h1:Tw49xqIbzQZOpHya4gQQSIbCOoicyt2qREgXpeg9cWU=
 github.com/VideoTranslationTools/base v0.1.2/go.mod h1:fsg4EVvJ/yV0Z2f9NwIrkKc8pKirQy8P4AlgUBqJ0sg=
@@ -55,8 +55,8 @@ github.com/allanpk716/go-parse-torrent-name v0.0.2 h1:0o9Mp5c1pO2LK+NVsth0MlDUi5
 github.com/allanpk716/go-parse-torrent-name v0.0.2/go.mod h1:H66QhXPJpUSdWschhL6u//v3ge96/qMnQ9mWp3efbxA=
 github.com/allanpk716/goutubedl v0.0.1 h1:6g1nOJIBlePaDQQwiMURMGIUSA+32roSHIihCsxZioI=
 github.com/allanpk716/goutubedl v0.0.1/go.mod h1:5KXd5tImdbmz4JoVhePtbIokCwAfEhUVVx3WLHmjYuw=
-github.com/allanpk716/rod_helper v0.0.82 h1:pSlZjsA9YnvsLnQNz9mzrqL4CgUYzRbT8XPYkdwa1QE=
-github.com/allanpk716/rod_helper v0.0.82/go.mod h1:90G5OlfwBywEyWudmBf/7xDqiOQlTybY9ahO5jJCvJ8=
+github.com/allanpk716/rod_helper v0.0.90 h1:Zvpxs0JZJZPq5/g928h+cg9rng8pW3k1sJht7LXe0GM=
+github.com/allanpk716/rod_helper v0.0.90/go.mod h1:x3PQLckCN13QQoG9ZhCP6rAMoBBRWzMoaAxH52qR7MU=
 github.com/allanpk716/sat v1.0.4 h1:Oz3Ba2T4Y8QM+fQdoP7ZHTF34psu2HY46sO/EbauM/U=
 github.com/allanpk716/sat v1.0.4/go.mod h1:PScEbYw8UMiu0y9VNvPdBkF9NU+xXnyK9FbrUUTFM2s=
 github.com/andybalholm/brotli v1.0.1/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
@@ -278,6 +278,8 @@ github.com/nzlov/chardet v0.0.0-20190815145004-022cbcf483f9/go.mod h1:1TeXuGo9we
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/olaure/chardet v0.0.7 h1:42vzVAcHBOGElI3oQLhPnFB83nRFF3iriDBswxa5HNM=
 github.com/olaure/chardet v0.0.7/go.mod h1:MYk2isPdDnWkb44RGTZ8nVkbA0yP5oMSS1hTB2ZO50M=
+github.com/panjf2000/ants/v2 v2.8.2 h1:D1wfANttg8uXhC9149gRt1PDQ+dLVFjNXkCEycMcvQQ=
+github.com/panjf2000/ants/v2 v2.8.2/go.mod h1:7ZxyxsqE4vvW0M7LSD8aI3cKwgFhBHbxnlN8mDqHa1I=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
@@ -352,6 +354,7 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/subosito/gotenv v1.4.1 h1:jyEFiXpy21Wm81FBN71l9VoMMV8H8jG+qIK3GCpY6Qs=
@@ -511,6 +514,8 @@ golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sync v0.0.0-20201207232520-09787c993a3a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sync v0.3.0 h1:ftCYgMx6zT/asHUrPw8BLLscYtGznsLAnjq5RH9P66E=
+golang.org/x/sync v0.3.0/go.mod h1:FU7BRWz2tNW+3quACPkgCx/L+uEAv1htQ0V83Z9Rj+Y=
 golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

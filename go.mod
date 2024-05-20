@@ -3,14 +3,16 @@ module github.com/VideoTranslationTools/client
 go 1.18
 
 require (
-	github.com/ChineseSubFinder/csf-supplier-base v0.50.3
+	github.com/ChineseSubFinder/csf-supplier-base v1.0.1
 	github.com/VideoTranslationTools/base v0.1.2
 	github.com/WQGroup/logger v0.0.6
 	github.com/allanpk716/conf v0.1.2
-	github.com/allanpk716/rod_helper v0.0.82
+	github.com/allanpk716/rod_helper v0.0.90
 	github.com/go-resty/resty/v2 v2.10.0
+	github.com/pkg/errors v0.9.1
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/sirupsen/logrus v1.9.0
+	github.com/spf13/viper v1.14.0
 	github.com/wader/goutubedl v0.0.0-20230607161020-2ec70c51c91b
 )
 
@@ -52,10 +54,10 @@ require (
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nzlov/chardet v0.0.0-20190815145004-022cbcf483f9 // indirect
 	github.com/olaure/chardet v0.0.7 // indirect
+	github.com/panjf2000/ants/v2 v2.8.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
@@ -63,7 +65,6 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.14.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect

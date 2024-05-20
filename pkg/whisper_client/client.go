@@ -91,3 +91,15 @@ func (wc *WhisperClient) GetTaskStatus(taskID int) (*SendTaskReply, error) {
 	rtaskResp := resp.Result().(*SendTaskReply)
 	return rtaskResp, nil
 }
+
+func (wc *WhisperClient) IsAlive() (bool, string) {
+
+	resp, err := wc.Client.R().
+		Get(wc.ServerURL + "/")
+
+	if err != nil || resp.StatusCode() != 200 {
+		return false, ""
+	}
+
+	return true, resp.String()
+}

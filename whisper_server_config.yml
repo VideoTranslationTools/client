@@ -1,0 +1,9 @@
+device: cuda
+device_index: "0"
+compute_type: default
+gpu_id: 0
+model_size: large-v3
+download_root: ""
+port: 5000
+token: "1234567890"
+vad: true
