@@ -19,27 +19,6 @@ import (
 
 func init() {
 
-	logger.Infoln("Version:", AppVersion)
-
-	logger.Infoln("Init Whisper Client ...")
-
-	whisperConfig := whisper_client.ReadWhisperServerConfig()
-	serverURL := fmt.Sprintf("http://127.0.0.1:%d", whisperConfig.Port)
-	token := whisperConfig.Token
-
-	whisperClient = whisper_client.NewWhisperClient(serverURL, token)
-
-	logger.Infoln("Init Whisper Client Done")
-
-	ollamaClientVersion := translator_llm.GetOllamaClientVersion()
-
-	logger.Infoln("Ollama Client Version:", ollamaClientVersion)
-
-	logger.Infoln("Read Ollama Config ...")
-
-	translator_llm.ReadOllamaTranslatorConfig()
-
-	logger.Infoln("Ollama config read Done")
 }
 
 func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
@@ -104,16 +83,40 @@ func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 
 func main() {
 
-	inputVideoFPath := flag.String("video", "", "the video file path")
-	inputOutPutDir := flag.String("out_dir", "", "output dir path")
+	inputVideoFPath := flag.String("video", "", "需要制作机翻字幕的视频文件路径")
+	inputOutPutDir := flag.String("out_dir", "", "翻译后字幕输出的根目录")
 	// ------------------------------------------------------------------------------
 	logger.SetLoggerLevel(logrus.InfoLevel)
 	flag.Parse()
+	// ------------------------------------------------------------------------------
+	logger.Infoln("Version:", AppVersion)
+
+	logger.Infoln("Init Whisper Client ...")
+
+	whisperConfig := whisper_client.ReadWhisperServerConfig()
+	serverURL := fmt.Sprintf("http://127.0.0.1:%d", whisperConfig.Port)
+	token := whisperConfig.Token
+
+	whisperClient = whisper_client.NewWhisperClient(serverURL, token)
+
+	logger.Infoln("Init Whisper Client Done")
+
+	ollamaClientVersion := translator_llm.GetOllamaClientVersion()
+
+	logger.Infoln("Ollama Client Version:", ollamaClientVersion)
+
+	logger.Infoln("Read Ollama Config ...")
+
+	translator_llm.ReadOllamaTranslatorConfig()
+
+	logger.Infoln("Ollama config read Done")
 	// ------------------------------------------------------------------------------
 	videoFPath := *inputVideoFPath
 	outPutDir := *inputOutPutDir
 	// 获取这个 videoTitle 视频文件的文件名称，不包含后缀名
 	videoTitle := strings.TrimSuffix(filepath.Base(videoFPath), filepath.Ext(videoFPath))
+
+	logger.Infoln("Video Title:", videoTitle)
 
 	if outPutDir == "" {
 		outPutDir = "."
@@ -163,13 +166,15 @@ func main() {
 
 	// 对于 needTranslateSRTFPath 进行 base64 加密
 	needTranslateSRTFPath = base64.StdEncoding.EncodeToString([]byte(needTranslateSRTFPath))
+	videoTitle = base64.StdEncoding.EncodeToString([]byte(videoTitle))
+	outPutDir = base64.StdEncoding.EncodeToString([]byte(outPutDir))
 	// 准备进行翻译
 	translator_llm.StartOllamaClient(needTranslateSRTFPath, videoTitle, outPutDir)
 
 	logger.Infoln("All Done")
 }
 
-var AppVersion = "unknow"
+var AppVersion = "v0.0.1"
 var whisperClient *whisper_client.WhisperClient
 
 const (

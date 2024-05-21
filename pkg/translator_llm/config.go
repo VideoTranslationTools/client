@@ -53,8 +53,8 @@ func GetOllamaTranslatorCommandArgs(srtFilePath string, translatedTitle string, 
 	cmd := ReadOllamaTranslatorConfig()
 	configArgsStrings := NewOllamaTranslatorCommandArgs(cmd)
 	return append([]string{
-		"--srt_file_path=\"" + srtFilePath + "\"",
-		"--translated_title=\"" + translatedTitle + "\"",
-		"--output_dir=\"" + outPutDir + "\"",
+		"--srt_file_path=" + srtFilePath,
+		"--translated_title=" + translatedTitle,
+		"--output_dir=" + outPutDir,
 	}, configArgsStrings...)
 }
