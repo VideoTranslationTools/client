@@ -1,0 +1,6 @@
+max_token_input: 350
+num_predict: 2048
+temperature: 0.1
+seed: 42
+model: "allanpk716/translate_srt:latest"
+ollama_url: "http://localhost:11434/api/chat"

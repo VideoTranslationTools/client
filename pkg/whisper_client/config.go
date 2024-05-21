@@ -36,8 +36,7 @@ func NewWhisperServerCommandArgs(cmd WhisperServerCommand) []string {
 	return args
 }
 
-func GetWhisperServerCommandArgs() []string {
-
+func ReadWhisperServerConfig() WhisperServerCommand {
 	// 设置配置文件名和路径
 	viper.SetConfigName("whisper_server_config") // 配置文件名为 config.yml
 	viper.AddConfigPath(".")                     // 在当前目录查找配置文件
@@ -55,12 +54,10 @@ func GetWhisperServerCommandArgs() []string {
 	if err != nil {
 		logger.Fatalln("Error unmarshalling config:", err)
 	}
+	return cmd
+}
 
-	// 调用函数执行 Python 程序
-	args := NewWhisperServerCommandArgs(cmd)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-
+func GetWhisperServerCommandArgs() []string {
+	args := NewWhisperServerCommandArgs(ReadWhisperServerConfig())
 	return args
 }

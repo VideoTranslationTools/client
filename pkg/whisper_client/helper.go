@@ -10,7 +10,11 @@ import (
 
 var execWrapper *pkg.ExecWrapper
 
-func StartWhisperServer() {
+const (
+	whisperExePath = ".\\whisper-server.exe"
+)
+
+func StartWhisperServer(wclient *WhisperClient) {
 
 	if execWrapper == nil {
 		execWrapper = pkg.NewExecWrapper(false)
@@ -18,11 +22,26 @@ func StartWhisperServer() {
 
 	logger.Infoln("Start Whisper Server ...")
 
-	err := execWrapper.Start(".\\whisper-server.exe", GetWhisperServerCommandArgs()...)
+	err := execWrapper.Start(whisperExePath, GetWhisperServerCommandArgs()...)
 	if err != nil {
 		logger.Fatalln("Start Whisper Server failed", err)
 		return
 	}
+	// 等待 Whisper Server 启动
+	isUp, whisperServerVersion := wclient.IsAlive()
+	if isUp == false {
+		for {
+			isUp, whisperServerVersion = wclient.IsAlive()
+			if isUp == true {
+				break
+			}
+			logger.Infoln("Whisper Server is not up, wait 5 seconds to check again")
+			time.Sleep(5 * time.Second)
+		}
+	}
+	logger.Infoln("Whisper Server Version:", whisperServerVersion)
+
+	logger.Infoln("Start Whisper Server Successfully")
 }
 
 func StopWhisperServer() {
@@ -39,23 +58,7 @@ func StopWhisperServer() {
 }
 
 func ProcessAudio2Srt(wclient *WhisperClient, audioFPath string, language string) error {
-
-	// 等待 Whisper Server 启动
-	isUp, whisperServerVersion := wclient.IsAlive()
-	if isUp == false {
-		for {
-			isUp, whisperServerVersion = wclient.IsAlive()
-			if isUp == true {
-				break
-			}
-			logger.Infoln("Whisper Server is not up, wait 5 seconds to check again")
-			time.Sleep(5 * time.Second)
-		}
-	}
-	logger.Infoln("Whisper Server Version:", whisperServerVersion)
-
-	logger.Infoln("Start Whisper Server Successfully")
-
+	// 生成随机数种子
 	rand.Seed(time.Now().UnixNano())
 	// 生成 8 位长度的随机数
 	nowTaskID := rand.Intn(90000000) + 10000000
