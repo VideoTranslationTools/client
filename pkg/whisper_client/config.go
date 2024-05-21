@@ -45,14 +45,14 @@ func ReadWhisperServerConfig() WhisperServerCommand {
 	// 读取配置文件
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Fatalln("Error reading config file:", err)
+		logger.Fatalln("Error reading whisper config file:", err)
 	}
 
 	// 将配置文件内容解析到 PythonCommand 结构体
 	var cmd WhisperServerCommand
 	err = viper.Unmarshal(&cmd)
 	if err != nil {
-		logger.Fatalln("Error unmarshalling config:", err)
+		logger.Fatalln("Error unmarshalling whisper config:", err)
 	}
 	return cmd
 }
