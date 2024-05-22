@@ -6,6 +6,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 	"io"
 	"path/filepath"
+	"strings"
 )
 
 type ProgressWriter struct {
@@ -86,4 +87,12 @@ func ExportSubtitleAndAudioFile(CacheRootFolder, videoFPath string) *ffmpeg_help
 	}
 
 	return ffmpegInfo
+}
+
+func IsExt(ext string) bool {
+	switch strings.ToLower(ext) {
+	case ".mp4", ".mkv", ".avi", ".flv", ".mov", ".wmv", ".webm", ".rm", ".asf", ".mpg", ".mpeg", ".m4v", ".3gp", ".3g2", ".ts", ".mts", ".m2ts", ".vob", ".f4v", ".m2v", ".dat", ".amv", ".divx", ".mpv", ".ogv", ".qt", ".f4p", ".f4a", ".f4b", ".m2p", ".m4b", ".m4p", ".m4r", ".nsv", ".ogm", ".ogx", ".rec", ".rmvb", ".tod", ".tts", ".vro", ".wtv", ".xesc":
+		return true
+	}
+	return false
 }

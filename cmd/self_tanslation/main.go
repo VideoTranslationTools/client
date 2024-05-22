@@ -18,9 +18,105 @@ import (
 )
 
 func init() {
-
+	logger.Infoln("Version:", AppVersion)
 }
 
+// 准备工作
+func prepare(inputOnlyDoFFMPEG bool) {
+
+	if inputOnlyDoFFMPEG == true {
+		logger.Infoln("Only Do FFMPEG, Not Do Recognize And Translate")
+		return
+	}
+	logger.Infoln("Init Whisper Client ...")
+
+	whisperConfig := whisper_client.ReadWhisperServerConfig()
+	serverURL := fmt.Sprintf("http://127.0.0.1:%d", whisperConfig.Port)
+	token := whisperConfig.Token
+
+	whisperClient = whisper_client.NewWhisperClient(serverURL, token)
+
+	logger.Infoln("Init Whisper Client Done")
+
+	ollamaClientVersion := translator_llm.GetOllamaClientVersion()
+
+	logger.Infoln("Ollama Client Version:", ollamaClientVersion)
+
+	logger.Infoln("Read Ollama Config ...")
+
+	translator_llm.ReadOllamaTranslatorConfig()
+
+	logger.Infoln("Ollama config read Done")
+}
+
+// 将一个视频文件处理得到翻译后的 srt 文件
+func processVideo2TranslatedSrt(videoFPath, outPutDir string, onlyDoFFMPEG bool) {
+
+	// 获取这个 videoTitle 视频文件的文件名称，不包含后缀名
+	videoTitle := strings.TrimSuffix(filepath.Base(videoFPath), filepath.Ext(videoFPath))
+
+	logger.Infoln("Video Title:", videoTitle)
+
+	if outPutDir == "" {
+		outPutDir = "."
+		// 转换到绝对路径
+		var err error
+		outPutDir, err = filepath.Abs(outPutDir)
+		if err != nil {
+			logger.Fatalln("filepath.Abs", err)
+		}
+		logger.Infoln("Will output translated file into:", outPutDir)
+	} else {
+		// 如果这个目录不存在，则新建
+		if pkg.IsDir(outPutDir) == false {
+			err := os.MkdirAll(outPutDir, os.ModePerm)
+			if err != nil {
+				logger.Fatalln("MkdirAll", err)
+			}
+		}
+		logger.Infoln("Will output translated file into:", outPutDir)
+	}
+	logger.Infoln("Video File Path:", videoFPath)
+	if pkg.IsFile(videoFPath) == false {
+		logger.Fatalln("video file is not exist")
+	}
+
+	logger.Infoln("Will export video subtitle and audio...")
+	// 然后调用 FFMPEG 进行音频的导出
+	ffmpegInfo := npkg.ExportSubtitleAndAudioFile(AppCacheRootDirPath, videoFPath)
+	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
+	if len(ffmpegInfo.AudioInfoList) <= 0 {
+		logger.Fatalln("ffmpegInfo.AudioInfoList <= 0")
+	}
+	logger.Infoln("Export Audio File Done ...")
+	logger.Infoln("SubtitleInfoList Count:", len(ffmpegInfo.SubtitleInfoList))
+	logger.Infoln("AudioInfoList Count:", len(ffmpegInfo.AudioInfoList))
+
+	if onlyDoFFMPEG == true {
+		logger.Infoln("Only Do FFMPEG, Not Do Recognize And Translate")
+		return
+	}
+
+	needTranslateSRTFPath := getNeedTranslateSRTFPath(ffmpegInfo)
+	var err error
+	if filepath.IsAbs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath)) == false {
+		needTranslateSRTFPath, err = filepath.Abs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath))
+		if err != nil {
+			logger.Fatalln("filepath.Abs", err)
+		}
+	}
+
+	logger.Infoln("Need Translate SRT File Path:", needTranslateSRTFPath)
+
+	// 对于 needTranslateSRTFPath 进行 base64 加密
+	needTranslateSRTFPath = base64.StdEncoding.EncodeToString([]byte(needTranslateSRTFPath))
+	videoTitle = base64.StdEncoding.EncodeToString([]byte(videoTitle))
+	outPutDir = base64.StdEncoding.EncodeToString([]byte(outPutDir))
+	// 准备进行翻译
+	translator_llm.StartOllamaClient(needTranslateSRTFPath, videoTitle, outPutDir)
+}
+
+// 获取需要翻译的 srt 文件路径
 func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 
 	// 如果没有对应的内置字幕文件，那么就需要转换音频文件为字幕文件
@@ -84,92 +180,57 @@ func getNeedTranslateSRTFPath(ffmpegInfo *ffmpeg_helper.FFMPEGInfo) string {
 func main() {
 
 	inputVideoFPath := flag.String("video", "", "需要制作机翻字幕的视频文件路径")
+	inputVideosDir := flag.String("videos_dir", "", "需要制作机翻字幕的视频文件目录")
 	inputOutPutDir := flag.String("out_dir", "", "翻译后字幕输出的根目录")
+	inputOnlyDoFFMPEG := flag.Bool("only_do_ffmpeg", false, "只做音频、SRT导出，不做语音识别、翻译")
 	// ------------------------------------------------------------------------------
 	logger.SetLoggerLevel(logrus.InfoLevel)
 	flag.Parse()
-	// ------------------------------------------------------------------------------
-	logger.Infoln("Version:", AppVersion)
 
-	logger.Infoln("Init Whisper Client ...")
-
-	whisperConfig := whisper_client.ReadWhisperServerConfig()
-	serverURL := fmt.Sprintf("http://127.0.0.1:%d", whisperConfig.Port)
-	token := whisperConfig.Token
-
-	whisperClient = whisper_client.NewWhisperClient(serverURL, token)
-
-	logger.Infoln("Init Whisper Client Done")
-
-	ollamaClientVersion := translator_llm.GetOllamaClientVersion()
-
-	logger.Infoln("Ollama Client Version:", ollamaClientVersion)
-
-	logger.Infoln("Read Ollama Config ...")
-
-	translator_llm.ReadOllamaTranslatorConfig()
-
-	logger.Infoln("Ollama config read Done")
-	// ------------------------------------------------------------------------------
 	videoFPath := *inputVideoFPath
+	videosDir := *inputVideosDir
 	outPutDir := *inputOutPutDir
-	// 获取这个 videoTitle 视频文件的文件名称，不包含后缀名
-	videoTitle := strings.TrimSuffix(filepath.Base(videoFPath), filepath.Ext(videoFPath))
+	onlyDoFFMPEG := *inputOnlyDoFFMPEG
+	// ------------------------------------------------------------------------------
+	prepare(onlyDoFFMPEG)
+	// ------------------------------------------------------------------------------
+	if videoFPath != "" {
+		logger.Infoln("--------------------------------------------------")
+		logger.Infoln("Process Video File:", videoFPath)
+		// 如果设置了视频文件路径，那么就直接处理这个视频文件
+		processVideo2TranslatedSrt(videoFPath, outPutDir, onlyDoFFMPEG)
 
-	logger.Infoln("Video Title:", videoTitle)
+	} else if videosDir != "" {
 
-	if outPutDir == "" {
-		outPutDir = "."
-		// 转换到绝对路径
-		var err error
-		outPutDir, err = filepath.Abs(outPutDir)
-		if err != nil {
-			logger.Fatalln("filepath.Abs", err)
-		}
-		logger.Infoln("Will output translated file into:", outPutDir)
-	} else {
-		// 如果这个目录不存在，则新建
-		if pkg.IsDir(outPutDir) == false {
-			err := os.MkdirAll(outPutDir, os.ModePerm)
-			if err != nil {
-				logger.Fatalln("MkdirAll", err)
+		logger.Infoln("Process Videos Dir:", videosDir)
+		var videosFPath = make([]string, 0)
+		// 如果设置了视频文件目录，那么就遍历这个目录下的所有视频文件
+		err := filepath.Walk(videosDir, func(fPath string, f os.FileInfo, err error) error {
+			if f == nil {
+				return err
 			}
-		}
-		logger.Infoln("Will output translated file into:", outPutDir)
-	}
-	logger.Infoln("Video File Path:", videoFPath)
-	if pkg.IsFile(videoFPath) == false {
-		logger.Fatalln("video file is not exist")
-	}
+			if f.IsDir() {
+				return nil
+			}
+			if npkg.IsExt(filepath.Ext(fPath)) == false {
+				return nil
+			}
 
-	logger.Infoln("Will export video subtitle and audio...")
-	// 然后调用 FFMPEG 进行音频的导出
-	ffmpegInfo := npkg.ExportSubtitleAndAudioFile(AppCacheRootDirPath, videoFPath)
-	// 正常来说只会有一个音频，然后还是需要用户再传入 URL 的时候指定这个视频的语言，这里就不做判断了（因为不准）
-	if len(ffmpegInfo.AudioInfoList) <= 0 {
-		logger.Fatalln("ffmpegInfo.AudioInfoList <= 0")
-	}
-	logger.Infoln("Export Audio File Done ...")
-	logger.Infoln("SubtitleInfoList Count:", len(ffmpegInfo.SubtitleInfoList))
-	logger.Infoln("AudioInfoList Count:", len(ffmpegInfo.AudioInfoList))
-
-	needTranslateSRTFPath := getNeedTranslateSRTFPath(ffmpegInfo)
-	var err error
-	if filepath.IsAbs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath)) == false {
-		needTranslateSRTFPath, err = filepath.Abs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath))
+			videosFPath = append(videosFPath, fPath)
+			return nil
+		})
 		if err != nil {
-			logger.Fatalln("filepath.Abs", err)
+			logger.Fatalln("filepath.Walk", err)
+		}
+
+		for index, videoFPath := range videosFPath {
+
+			logger.Infoln("--------------------------------------------------")
+			logger.Infof("Process Video Index: %d / %d, Video File Path: %s\n", index+1, len(videosFPath), videoFPath)
+
+			processVideo2TranslatedSrt(videoFPath, outPutDir, onlyDoFFMPEG)
 		}
 	}
-
-	logger.Infoln("Need Translate SRT File Path:", needTranslateSRTFPath)
-
-	// 对于 needTranslateSRTFPath 进行 base64 加密
-	needTranslateSRTFPath = base64.StdEncoding.EncodeToString([]byte(needTranslateSRTFPath))
-	videoTitle = base64.StdEncoding.EncodeToString([]byte(videoTitle))
-	outPutDir = base64.StdEncoding.EncodeToString([]byte(outPutDir))
-	// 准备进行翻译
-	translator_llm.StartOllamaClient(needTranslateSRTFPath, videoTitle, outPutDir)
 
 	logger.Infoln("All Done")
 }
