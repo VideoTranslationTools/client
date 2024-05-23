@@ -152,14 +152,6 @@ func translateProcessor(needTranslateSRTFPath string, videoTitle string, outPutD
 		logger.Infoln("Will output translated file into:", outPutDir)
 	}
 
-	var err error
-	if filepath.IsAbs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath)) == false {
-		needTranslateSRTFPath, err = filepath.Abs(filepath.Join(AppCacheRootDirPath, needTranslateSRTFPath))
-		if err != nil {
-			logger.Fatalln("filepath.Abs", err)
-		}
-	}
-
 	logger.Infoln("Need Translate SRT File Path:", needTranslateSRTFPath)
 
 	// 对于 needTranslateSRTFPath 进行 base64 加密
