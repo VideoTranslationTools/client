@@ -2,7 +2,7 @@
 
 > 完成初版啦，Windows 平台使用有问题欢迎反馈。
 >
-> 源码整理过后会放出来
+> 源码整理过后会放出来（开放啦）
 >
 > 理论上这套代码可以在：Windows、Linux、MAC 上都能运行，但是，作者只擅长 Windows，所以···开源后，看大家了···
 
@@ -204,3 +204,8 @@ ASS
 2. 提供 ASS 字幕 Style 外部配置文件
 3. 优化 Whisper-server 的打包体积
 4. 提供子模块最新版本查询接口，便于提示更新
+
+## 子模块项目
+
+* [VideoTranslationTools/whisper-server: 使用 openai whisper 进行 V2T (github.com)](https://github.com/VideoTranslationTools/whisper-server)
+* [VideoTranslationTools/LLM_translator: 使用本地的 LLM 进行机翻 (github.com)](https://github.com/VideoTranslationTools/LLM_translator)
