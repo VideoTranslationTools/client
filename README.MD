@@ -82,9 +82,9 @@
 
 > 截图的这些是最基本的支持库和程序，主程序会在下面提到。
 
-![image-20240518141525922](assets/image-20240518141525922.png)
+![image-20240523105603187](assets/image-20240523105603187.png)
 
-
+`self_tanslation.exe`，这个是主程序，也需要放在相同的文件夹中，上面截图都是子模块和模型文件。
 
 ### 02 安装 whisper
 
@@ -93,11 +93,13 @@
 > `C:\temp\whisper_model\models--Systran--faster-whisper-large-v3` 
 
 2. 理论上可能需要安装 CUDA 11.8 的开发包，但是现在 whisper_server 的打包不确定是否搞定这个支持库，还需要找一台“干净”的机器来做实验才知道
+2. 双击启动 `whisper-server.exe`，因为是 pyintaller 打包的，所以启动很慢，不报错，启动成功 Windows 防火墙会提示这个程序请求开启 5000 本地端口，你需要同意，否则后续是无法使用的
+2. 启动成功就可以关闭了，因为后续是全自动的，本地启动是验证能用
 
 ### 03 安装 ollama
 
 1. 根据 ollama 官方引导，安装：[Download Ollama on Windows](https://ollama.com/download)
-2. 设置系统环境变量`OLLAMA_MODELS`，内容为`C:\temp\ollama_model`（设置完毕建议注销一次或者重启一次电脑）
+2. 设置系统环境变量`OLLAMA_MODELS`，内容为`C:\temp\ollama_model`（设置完毕建议注销一次或者重启一次电脑），因为提供了离线的模型下载，所以需要单独设置一下，这里举例是 C 盘，具体看你那个盘空间大，且，最好是固态硬盘
 3. `C:\temp\ollama_model` 中`models.zip`解压到`C:\temp\ollama_model` 中，应该得到如下目录结构
 
 > `C:\temp\ollama_model\manifests` 
@@ -108,11 +110,62 @@
 
 ![image-20240518141857814](assets/image-20240518141857814.png)
 
-> 如果你网络流畅，可以直接用 `ollama pull allanpk716/translate_srt:latest` 来获取最新的翻译模型
+> 如果你网络流畅，可以直接用 `ollama pull allanpk716/translate_srt:latest` 来获取最新的翻译模型，那么就不去下载离线模型了
 
 ## 如何使用
 
-等待完善文档
+你需要完成《单机部署》，把该下载的都下载了，放对目录。
+
+这里直接举例一些使用的命令，请**举一反三**!
+
+### 1 一个视频文件，直接机翻
+
+`.\self_tanslation.exe --video="D:\tmp\test_video\欢乐一家亲\欢乐一家亲 - S05E01 - 第 1 集.mp4"`
+
+那么默认输出的机翻字幕会生成在：`self_tanslation` 同级目录。
+
+### 2 视频文件文件夹，直接机翻
+
+![image-20240523111520365](assets/image-20240523111520365.png)
+
+`.\self_tanslation.exe --videos_dir="X:\连续剧\Mayday\Season 23"`
+
+那么默认输出的机翻字幕会生成在：`self_tanslation` 同级目录。
+
+### 3 在一台电脑上导出 ffmpeg 中间文件，然后再到有算力的机器上进行机翻
+
+这个情况是比较特殊的，比如我现在有两个机房：
+
+* A，视频文件存储地
+* B，拥有算力，可以进行机翻
+
+但是这两个地方的网络带宽很低，直接使用上面两个示例的去做机翻，会严重的卡在数据传输上面。那么有个傻一点的方案（其实之前做过中间服务器方案，由于法规问题就砍了），在 A 服务器上，现进行 FFMPEG 信息的导出，然后把这些文件复制到 B 服务器上，再进行机翻。
+
+在 A 上面执行：
+
+`.\self_tanslation.exe --videos_dir="X:\连续剧\Mayday\Season 23" --only_do_ffmpeg=true`
+
+然后会在 `self_tanslation` 同级目录下的`ffmpeg_cache`文件夹中，得到对应视频的 FFMPEG 的中间缓存文件
+
+![image-20240523110948787](assets/image-20240523110948787.png)
+
+![image-20240523111013265](assets/image-20240523111013265.png)
+
+把这些文件夹拷贝到 B 上面，然后执行：
+
+> 比如放到下图文件夹中
+
+![image-20240523111052453](assets/image-20240523111052453.png)
+
+`.\self_tanslation.exe --ffmpeg_files_dir="D:\temp\test"`
+
+那么默认输出的机翻字幕会生成在：`self_tanslation` 同级目录。
+
+## 如何更新
+
+主要是本地部署的模型太大了，基本没法打包成一个来发布，所以最直接的方案就是，看共享盘如果有文件更新就下载替换即可。
+
+![image-20240523111937729](assets/image-20240523111937729.png)
 
 ## 资源文件下载
 
@@ -135,4 +188,10 @@
 
 ### 翻译效果
 
+SRT
+
 ![image-20240523091857994](assets/image-20240523091857994.png)
+
+ASS
+
+![image-20240523110104582](assets/image-20240523110104582.png)
